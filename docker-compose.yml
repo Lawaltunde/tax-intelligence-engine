@@ -1,0 +1,28 @@
+services:
+  db:
+    container_name: postgres-wealthsimple-atie
+    image: postgres:16
+    environment:
+      POSTGRES_DB: wealthsimple_atie
+      POSTGRES_USER: lawaltunde
+      POSTGRES_PASSWORD: REDACTED_DB_PASSWORD
+      PGDATA: /data/postgres
+    volumes:
+      - db:/data/postgres
+    ports:
+      - "5333:5432"
+    networks:
+      - db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lawaltunde -d wealthsimple_atie"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  db:
