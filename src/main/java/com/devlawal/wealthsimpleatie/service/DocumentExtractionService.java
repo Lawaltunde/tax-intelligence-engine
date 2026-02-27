@@ -3,6 +3,7 @@ package com.devlawal.wealthsimpleatie.service;
 import com.devlawal.wealthsimpleatie.ai.TaxSlipExtractionAgent;
 import com.devlawal.wealthsimpleatie.config.AtieProperties;
 import com.devlawal.wealthsimpleatie.dto.ExtractedTaxFieldsDto;
+import com.devlawal.wealthsimpleatie.exception.DocumentExtractionException;
 import com.devlawal.wealthsimpleatie.model.ConfidenceScores;
 import com.devlawal.wealthsimpleatie.model.TaxProfile;
 import com.devlawal.wealthsimpleatie.repository.TaxProfileRepository;
@@ -49,6 +50,10 @@ public class DocumentExtractionService {
      * @return normalised TaxProfile with per-field confidence scores
      */
     public TaxProfile extract(MultipartFile file, String taxYear) {
+        if (taxYear == null || taxYear.isBlank() || !taxYear.matches("\\d{4}")) {
+            throw new DocumentExtractionException(
+                    "Invalid taxYear '%s' — expected a 4-digit year (e.g. 2024).".formatted(taxYear));
+        }
         log.info("Starting extraction for file '{}', tax year {}", file.getOriginalFilename(), taxYear);
 
         // 1. Convert PDF to text
@@ -88,7 +93,7 @@ public class DocumentExtractionService {
         // 6. Persist to database
         taxProfileRepository.save(profile);
 
-        log.info("Extraction complete and persisted: {}", profile);
+        log.info("Extraction complete and persisted: profileId={}, taxYear={}", profile.profileId(), profile.taxYear());
         return profile;
     }
 

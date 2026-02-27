@@ -2,6 +2,8 @@ package com.devlawal.wealthsimpleatie.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 /**
  * Immutable audit record for every AI decision made by ATIE.
  *
@@ -25,7 +27,7 @@ import java.time.Instant;
         @Index(name = "idx_audit_agent",   columnList = "agent_name"),
         @Index(name = "idx_audit_ts",      columnList = "decided_at")
 })
-public final class AiDecisionLog {
+public class AiDecisionLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,11 +101,22 @@ public final class AiDecisionLog {
         public Builder aiOutput(String v)            { this.aiOutput = v; return this; }
         public Builder confidenceScore(Double v)     { this.confidenceScore = v; return this; }
 
-        public AiDecisionLog build()                 { return new AiDecisionLog(this); }
+        public AiDecisionLog build() {
+            List<String> missing = new ArrayList<>();
+            if (profileId    == null || profileId.isBlank())  missing.add("profileId");
+            if (decisionType == null)                         missing.add("decisionType");
+            if (agentName    == null || agentName.isBlank())  missing.add("agentName");
+            if (aiOutput     == null || aiOutput.isBlank())   missing.add("aiOutput");
+            if (!missing.isEmpty()) {
+                throw new IllegalStateException(
+                        "AiDecisionLog is missing required field(s): " + String.join(", ", missing));
+            }
+            return new AiDecisionLog(this);
+        }
     }
 
     private static String truncate(String s, int max) {
         if (s == null) return null;
-        return s.length() <= max ? s : s.substring(0, max) + "…";
+        return s.length() <= max ? s : s.substring(0, max - 1) + "…";
     }
 }

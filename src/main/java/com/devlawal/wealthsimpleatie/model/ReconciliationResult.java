@@ -94,6 +94,14 @@ public final class ReconciliationResult {
         public Builder requiresReview(boolean r)         { this.requiresReview = r; return this; }
         public Builder aiExplanation(String e)           { this.aiExplanation = e; return this; }
 
-        public ReconciliationResult build() { return new ReconciliationResult(this); }
+        public ReconciliationResult build() {
+            if (profileId == null || profileId.isBlank())
+                throw new IllegalStateException("ReconciliationResult requires 'profileId'");
+            if (field == null || field.isBlank())
+                throw new IllegalStateException("ReconciliationResult requires 'field'");
+            if (severity == null)
+                throw new IllegalStateException("ReconciliationResult requires 'severity'");
+            return new ReconciliationResult(this);
+        }
     }
 }

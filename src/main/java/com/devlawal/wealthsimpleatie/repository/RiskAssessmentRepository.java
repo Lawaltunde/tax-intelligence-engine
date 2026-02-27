@@ -18,6 +18,6 @@ public interface RiskAssessmentRepository extends JpaRepository<RiskAssessment, 
     /** Returns the most recent risk assessment for a given profile (if any). */
     Optional<RiskAssessment> findTopByProfileIdOrderByIdDesc(String profileId);
 
-    /** Returns all high-risk assessments — useful for reporting / audit queries. */
+    /** Returns all assessments matching the supplied {@code riskLevel} — useful for reporting / audit queries. */
     List<RiskAssessment> findByRiskLevel(RiskLevel riskLevel);
 }

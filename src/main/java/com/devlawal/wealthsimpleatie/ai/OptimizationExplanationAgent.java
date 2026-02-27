@@ -1,6 +1,7 @@
 package com.devlawal.wealthsimpleatie.ai;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.devlawal.wealthsimpleatie.exception.AiResponseParsingException;
 import com.devlawal.wealthsimpleatie.util.JsonResponseValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,17 +58,29 @@ public class OptimizationExplanationAgent {
 
         log.debug("Requesting optimization tradeoff explanation");
 
-        String rawResponse = chatClient.prompt()
-                .user(prompt)
-                .call()
-                .content();
+        String rawResponse = null;
+        try {
+            rawResponse = chatClient.prompt()
+                    .user(prompt)
+                    .call()
+                    .content();
 
-        log.debug("Raw AI optimization explanation: {}", rawResponse);
+            log.debug("Raw AI optimization explanation ({} chars)", rawResponse == null ? 0 : rawResponse.length());
 
-        TradeoffResponse response = validator.parse(rawResponse, TradeoffResponse.class);
-        return response.tradeoffExplanation() != null
-                ? response.tradeoffExplanation()
-                : "No explanation available.";
+            TradeoffResponse response = validator.parse(rawResponse, TradeoffResponse.class);
+            return response.tradeoffExplanation() != null
+                    ? response.tradeoffExplanation()
+                    : "No explanation available.";
+
+        } catch (AiResponseParsingException ex) {
+            log.warn("Optimization explanation parse failed: {}", ex.getMessage());
+            log.debug("Unparseable AI response: {}", rawResponse);
+            return "No explanation available.";
+
+        } catch (Exception ex) {
+            log.error("Optimization explanation AI call failed: {}", ex.getMessage(), ex);
+            return "No explanation available.";
+        }
     }
 
     // ── Internal response record ─────────────────────────────────────────────

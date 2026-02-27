@@ -45,6 +45,9 @@ public class CraImportService {
      * @return CRA-reported financial data for reconciliation
      */
     public CraImportDto importWithNac(CraAuthRequest auth) {
+        if (auth == null) {
+            throw new IllegalArgumentException("CraAuthRequest must not be null");
+        }
         if (mockMode) {
             log.info("MOCK mode — returning simulated CRA data for {}", auth.toMaskedString());
             return mockResponse(auth.taxYear());

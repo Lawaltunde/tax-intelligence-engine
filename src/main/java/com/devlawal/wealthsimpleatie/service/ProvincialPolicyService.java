@@ -53,15 +53,16 @@ public class ProvincialPolicyService {
     public ProvincialPolicyResponse analyse(ProvincialPolicyRequest request) {
         // ── Step 1: Deterministic provincial tax calculation ─────────────────
         double taxableIncome = Math.max(0,
-                request.employmentIncome() - request.rrspContribution());
+                request.employmentIncome() - request.rrspContribution() + request.capitalGains());
 
         double grossProvincialTax = ProvincialTaxCalculator
                 .calculateProvincialTax(taxableIncome, request.province());
 
-        // Apply basic personal amount credit (bottom-bracket rate × BPA)
+        // Apply basic personal amount credit: BPA × lowest provincial marginal rate
+        // (Using the full bracket function on BPA overstates the credit for taxpayers
+        //  whose BPA falls in the first bracket — the correct formula is BPA × rate1.)
         double bpa = ProvincialTaxCalculator.basicPersonalAmount(request.province());
-        double bpaCredit = ProvincialTaxCalculator
-                .calculateProvincialTax(bpa, request.province());
+        double bpaCredit = bpa * ProvincialTaxCalculator.lowestBracketRate(request.province());
         double provincialTaxBeforeOtherCredits = Math.max(0, grossProvincialTax - bpaCredit);
 
         log.info("Provincial tax: province={}, taxableIncome={}, grossTax={}, bpaCredit={}, beforeOtherCredits={}",

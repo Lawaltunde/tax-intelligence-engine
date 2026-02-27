@@ -52,6 +52,9 @@ public class RiskAssessmentService {
      * Evaluates the pre-filing risk profile and persists the result.
      */
     public RiskAssessment assess(TaxProfile profile, boolean hasDiscrepancy) {
+        if (profile == null) {
+            throw new IllegalArgumentException("TaxProfile must not be null for risk assessment");
+        }
         AtieProperties.Risk risk = properties.risk();
         List<String> drivers = new ArrayList<>();
         int score = 0;

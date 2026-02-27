@@ -1,6 +1,7 @@
 package com.devlawal.wealthsimpleatie.ai;
 
 import com.devlawal.wealthsimpleatie.dto.ExtractedTaxFieldsDto;
+import com.devlawal.wealthsimpleatie.exception.DocumentExtractionException;
 import com.devlawal.wealthsimpleatie.util.JsonResponseValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,11 @@ public class TaxSlipExtractionAgent {
      * @return structured tax fields with per-field confidence scores
      */
     public ExtractedTaxFieldsDto extract(String documentText) {
+        if (documentText == null || documentText.isBlank()) {
+            throw new DocumentExtractionException(
+                    "Cannot extract tax fields: document text is null or blank.");
+        }
+
         String prompt = EXTRACTION_PROMPT.formatted(documentText);
 
         log.debug("Sending tax extraction prompt ({} chars)", prompt.length());
@@ -71,7 +77,8 @@ public class TaxSlipExtractionAgent {
                 .call()
                 .content();
 
-        log.debug("Raw AI extraction response: {}", rawResponse);
+        // Log only size metadata — raw response may contain extracted financial values
+        log.debug("AI extraction response received ({} chars)", rawResponse == null ? 0 : rawResponse.length());
 
         return validator.parse(rawResponse, ExtractedTaxFieldsDto.class);
     }

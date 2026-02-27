@@ -69,6 +69,30 @@ public final class ProvincialTaxCalculator {
         };
     }
 
+    /**
+     * Returns the lowest (first) marginal rate for the given province.
+     * Used to compute the basic personal amount non-refundable credit correctly:
+     *   credit = BPA × lowestRate
+     * (Applying the full progressive bracket function to BPA overstates the credit.)
+     */
+    public static double lowestBracketRate(Province province) {
+        return switch (province) {
+            case ON -> 0.0505;
+            case BC -> 0.0506;
+            case AB -> 0.10;
+            case QC -> 0.14;
+            case MB -> 0.108;
+            case SK -> 0.105;
+            case NS -> 0.0879;
+            case NB -> 0.094;
+            case NL -> 0.087;
+            case PE -> 0.096;
+            case NT -> 0.059;
+            case NU -> 0.04;
+            case YT -> 0.064;
+        };
+    }
+
     // ── Provincial calculators ────────────────────────────────────────────────
 
     // Ontario — 2024 brackets
@@ -93,10 +117,14 @@ public final class ProvincialTaxCalculator {
     }
 
     // Quebec — 2024 brackets
+    // Bracket 1: $0 – $51,780          → 14.00%
+    // Bracket 2: $51,780 – $103,545    → 19.00%
+    // Bracket 3: $103,545 – $126,000   → 24.25%  (reduced to 24% in 2025)
+    // Bracket 4: over $126,000         → 25.75%
     private static double calculateQuebec(double income) {
         return bracket(income,
-                new double[]{51_780, 103_545},
-                new double[]{0.14, 0.19, 0.2425});
+                new double[]{51_780, 103_545, 126_000},
+                new double[]{0.14, 0.19, 0.2425, 0.2575});
     }
 
     // Manitoba — 2024 brackets

@@ -3,6 +3,7 @@ package com.devlawal.wealthsimpleatie.controller;
 import com.devlawal.wealthsimpleatie.dto.CraAuthRequest;
 import com.devlawal.wealthsimpleatie.dto.CraImportDto;
 import com.devlawal.wealthsimpleatie.service.CraImportService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +46,7 @@ public class CraController {
      * }
      */
     @PostMapping("/import")
-    public ResponseEntity<CraImportDto> importFromCra(@RequestBody CraAuthRequest auth) {
+    public ResponseEntity<CraImportDto> importFromCra(@Valid @RequestBody CraAuthRequest auth) {
         CraImportDto data = craImportService.importWithNac(auth);
         return ResponseEntity.ok(data);
     }

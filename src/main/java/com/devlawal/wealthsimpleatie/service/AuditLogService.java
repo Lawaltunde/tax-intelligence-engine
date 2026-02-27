@@ -35,14 +35,17 @@ public class AuditLogService {
      * Swallows exceptions to prevent audit failures from disrupting the main flow.
      */
     public void record(AiDecisionLog entry) {
+        // Capture profileId before entering the try block so the catch handler
+        // can safely reference it even if entry is null or save() throws.
+        String profileId = (entry != null) ? entry.profileId() : "<null-entry>";
         try {
             repository.save(entry);
             log.debug("AI decision logged: agent={}, profile={}, type={}",
-                    entry.agentName(), entry.profileId(), entry.decisionType());
+                    entry.agentName(), profileId, entry.decisionType());
         } catch (Exception e) {
             // Audit failure must never break the calling service
             log.error("Failed to persist AI decision log for profile={}: {}",
-                    entry.profileId(), e.getMessage(), e);
+                    profileId, e.getMessage(), e);
         }
     }
 

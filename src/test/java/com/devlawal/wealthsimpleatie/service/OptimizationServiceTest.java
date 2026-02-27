@@ -35,6 +35,7 @@ class OptimizationServiceTest {
     @DisplayName("computes positive savings for a valid additional RRSP contribution")
     void computesPositiveSavings() {
         TaxProfile profile = TaxProfile.builder()
+                .profileId("test-profile-001")
                 .employmentIncome(80_000.00)
                 .rrspContribution(3_000.00)
                 .capitalGains(0.00)
@@ -52,6 +53,7 @@ class OptimizationServiceTest {
     @DisplayName("returns zero savings for zero additional contribution")
     void zeroSavingsForZeroContribution() {
         TaxProfile profile = TaxProfile.builder()
+                .profileId("test-profile-001")
                 .employmentIncome(80_000.00)
                 .rrspContribution(3_000.00)
                 .capitalGains(0.00)
@@ -67,6 +69,7 @@ class OptimizationServiceTest {
     @DisplayName("taxable income does not go below zero when contribution exceeds income")
     void taxableIncomeFloorAtZero() {
         TaxProfile profile = TaxProfile.builder()
+                .profileId("test-profile-001")
                 .employmentIncome(5_000.00)
                 .rrspContribution(0.00)
                 .capitalGains(0.00)
@@ -82,6 +85,7 @@ class OptimizationServiceTest {
     @DisplayName("optimization result contains AI tradeoff explanation")
     void resultContainsAiExplanation() {
         TaxProfile profile = TaxProfile.builder()
+                .profileId("test-profile-001")
                 .employmentIncome(75_000.00)
                 .rrspContribution(2_000.00)
                 .capitalGains(0.00)
@@ -97,6 +101,7 @@ class OptimizationServiceTest {
     void capitalLossCarryforwardReducesTax() {
         // Without carryforward: 10,000 capital gains * 50% = $5,000 taxable → more tax
         TaxProfile withoutCarryforward = TaxProfile.builder()
+                .profileId("test-profile-001")
                 .employmentIncome(70_000.00)
                 .rrspContribution(0.00)
                 .capitalGains(10_000.00)
@@ -105,6 +110,7 @@ class OptimizationServiceTest {
 
         // With full carryforward: capital gains are fully offset → no taxable capital gains
         TaxProfile withCarryforward = TaxProfile.builder()
+                .profileId("test-profile-002")
                 .employmentIncome(70_000.00)
                 .rrspContribution(0.00)
                 .capitalGains(10_000.00)
@@ -123,6 +129,7 @@ class OptimizationServiceTest {
     void tuitionCarryforwardReducesTax() {
         // $10,000 tuition carryforward → $1,500 federal credit (10,000 * 15%)
         TaxProfile withTuition = TaxProfile.builder()
+                .profileId("test-profile-001")
                 .employmentIncome(60_000.00)
                 .rrspContribution(0.00)
                 .capitalGains(0.00)
@@ -130,6 +137,7 @@ class OptimizationServiceTest {
                 .build();
 
         TaxProfile withoutTuition = TaxProfile.builder()
+                .profileId("test-profile-002")
                 .employmentIncome(60_000.00)
                 .rrspContribution(0.00)
                 .capitalGains(0.00)

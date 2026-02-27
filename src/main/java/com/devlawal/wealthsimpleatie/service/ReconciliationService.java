@@ -12,6 +12,7 @@ import com.devlawal.wealthsimpleatie.repository.ReconciliationResultRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,7 @@ public class ReconciliationService {
      * Reconciles all fields between the uploaded TaxProfile and CRA-reported data.
      * Results are persisted to the database and returned to the caller.
      */
+    @Transactional
     public List<ReconciliationResult> reconcile(TaxProfile uploaded, CraImportDto cra) {
         double threshold = properties.reconciliation().mismatchThreshold();
         List<ReconciliationResult> results = new ArrayList<>();

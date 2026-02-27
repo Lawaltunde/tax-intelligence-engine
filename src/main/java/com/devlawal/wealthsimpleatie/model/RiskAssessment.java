@@ -9,7 +9,7 @@ import java.util.List;
  * JPA entity for a pre-filing risk profile.
  * Score range 0–100; level derived from score thresholds.
  *
- * Drivers are stored as a single TEXT column (comma-separated) to keep
+ * Drivers are stored as a single TEXT column (pipe-separated, '|' delimiter) to keep
  * the schema simple. A separate join table can be introduced when needed.
  */
 @Entity
@@ -65,7 +65,10 @@ public final class RiskAssessment {
         public Builder profileId(String v)          { this.profileId = v; return this; }
         public Builder riskScore(int score)         { this.riskScore = score; return this; }
         public Builder riskLevel(RiskLevel level)   { this.riskLevel = level; return this; }
-        public Builder drivers(List<String> drivers) { this.drivers = drivers; return this; }
+        public Builder drivers(List<String> drivers) {
+            this.drivers = drivers != null ? drivers : new ArrayList<>();
+            return this;
+        }
 
         public RiskAssessment build() { return new RiskAssessment(this); }
     }

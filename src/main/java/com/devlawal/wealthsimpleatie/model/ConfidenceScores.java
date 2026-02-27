@@ -41,6 +41,7 @@ public final class ConfidenceScores {
     }
 
     private static double clamp(double v) {
+        if (!Double.isFinite(v)) return 0.0;   // guard against NaN / ±Infinity from LLM output
         return Math.max(0.0, Math.min(1.0, v));
     }
 

@@ -1,6 +1,7 @@
 package com.devlawal.wealthsimpleatie.ai;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.devlawal.wealthsimpleatie.exception.AiResponseParsingException;
 import com.devlawal.wealthsimpleatie.util.JsonResponseValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,15 +59,30 @@ public class ReconciliationExplanationAgent {
 
         log.debug("Requesting reconciliation explanation for field '{}'", field);
 
-        String rawResponse = chatClient.prompt()
-                .user(prompt)
-                .call()
-                .content();
+        String rawResponse = null;
+        try {
+            rawResponse = chatClient.prompt()
+                    .user(prompt)
+                    .call()
+                    .content();
 
-        log.debug("Raw AI reconciliation response: {}", rawResponse);
+            log.debug("Raw AI reconciliation response: {}", rawResponse);
 
-        ExplanationResponse response = validator.parse(rawResponse, ExplanationResponse.class);
-        return response.explanation() != null ? response.explanation() : "No explanation available.";
+            ExplanationResponse response = validator.parse(rawResponse, ExplanationResponse.class);
+            return response.explanation() != null ? response.explanation() : "No explanation available.";
+
+        } catch (AiResponseParsingException ex) {
+            // LLM returned malformed or non-JSON output — recoverable; reconciliation can still proceed.
+            log.warn("AI explanation parse failed for field '{}': {}", field, ex.getMessage());
+            log.debug("Unparseable AI response for field '{}': {}", field, rawResponse);
+            return "No explanation available.";
+
+        } catch (Exception ex) {
+            // Network error, auth failure, rate limit, or other unexpected failure.
+            // Log at ERROR so operators are alerted, but allow reconciliation to complete.
+            log.error("AI explanation call failed for field '{}': {}", field, ex.getMessage(), ex);
+            return "No explanation available.";
+        }
     }
 
     // ── Internal response record ─────────────────────────────────────────────

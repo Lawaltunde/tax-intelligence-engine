@@ -42,6 +42,8 @@ class TaxBracketCalculatorTest {
 
     @ParameterizedTest(name = "income={0} → marginalRate={1}")
     @CsvSource({
+            "0,      0.0",
+            "-5000,  0.0",
             "30000,  0.15",
             "57375,  0.15",
             "60000,  0.205",

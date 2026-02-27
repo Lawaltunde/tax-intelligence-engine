@@ -47,10 +47,15 @@ public class OptimizationService {
      */
     public OptimizationResult simulateRrspContribution(TaxProfile profile,
                                                        double additionalContrib) {
+        if (additionalContrib < 0) {
+            throw new IllegalArgumentException(
+                    "additionalContrib must be >= 0, got: " + additionalContrib);
+        }
         double baseIncome    = profile.employmentIncome();
         double existingRrsp  = profile.rrspContribution();
 
         // ── Capital loss carryforward reduces net capital gains (CRA Schedule 3) ─
+        double capitalLossApplied = Math.min(profile.capitalLossCarryforward(), profile.capitalGains());
         double netCapitalGains = Math.max(0,
                 profile.capitalGains() - profile.capitalLossCarryforward());
         // Only 50% of net capital gains are taxable (inclusion rate)
@@ -99,7 +104,7 @@ public class OptimizationService {
                 .currentTax(currentTax)
                 .optimizedTax(optimizedTax)
                 .estimatedSavings(savings)
-                .capitalLossCarryforwardApplied(profile.capitalLossCarryforward())
+                .capitalLossCarryforwardApplied(capitalLossApplied)
                 .tuitionCreditApplied(tuitionCredit)
                 .aiTradeoffExplanation(explanation)
                 .build();

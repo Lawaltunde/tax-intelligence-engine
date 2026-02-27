@@ -3,6 +3,7 @@ package com.devlawal.wealthsimpleatie.controller;
 import com.devlawal.wealthsimpleatie.dto.ExtractedProfileDto;
 import com.devlawal.wealthsimpleatie.model.TaxProfile;
 import com.devlawal.wealthsimpleatie.service.DocumentExtractionService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +39,14 @@ public class DocumentController {
     public ResponseEntity<ExtractedProfileDto> extract(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "taxYear", defaultValue = "2024") String taxYear) {
+
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (!MediaType.APPLICATION_PDF_VALUE.equalsIgnoreCase(file.getContentType())) {
+            return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).build();
+        }
 
         TaxProfile profile = extractionService.extract(file, taxYear);
         return ResponseEntity.ok(ExtractedProfileDto.from(profile));

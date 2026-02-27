@@ -43,9 +43,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CraAuthenticationException.class)
     public ProblemDetail handleCraAuth(CraAuthenticationException ex) {
-        log.warn("CRA authentication rejected: {}", ex.getMessage());
+        // Log the detail at DEBUG only — the message may contain credential hints (SIN, NAC, DOB).
+        // Never echo raw exception text to the client response.
+        log.warn("CRA authentication rejected (see DEBUG for detail)");
+        log.debug("CRA authentication detail: {}", ex.getMessage());
         return problem(HttpStatus.UNAUTHORIZED, "cra-auth-error",
-                "CRA Authentication Failed", ex.getMessage());
+                "CRA Authentication Failed",
+                "CRA authentication failed. Please verify your credentials and try again.");
     }
 
     @ExceptionHandler(CraServiceException.class)

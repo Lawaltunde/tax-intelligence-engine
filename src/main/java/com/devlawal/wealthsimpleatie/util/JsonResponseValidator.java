@@ -60,16 +60,25 @@ public class JsonResponseValidator {
         return trimmed;
     }
 
+    private static final int PREVIEW_MAX_CHARS = 120;
+
+    private static String safePreview(String json) {
+        if (json == null || json.isEmpty()) return "<empty>";
+        return json.length() <= PREVIEW_MAX_CHARS
+                ? json
+                : json.substring(0, PREVIEW_MAX_CHARS) + "… [TRUNCATED, total=" + json.length() + " chars]";
+    }
+
     private void assertValidJson(String json) {
         try {
             JsonNode node = objectMapper.readTree(json);
             if (!node.isObject()) {
                 throw new AiResponseParsingException(
-                        "AI response is valid JSON but is not a JSON object: " + json);
+                        "AI response is valid JSON but is not a JSON object: " + safePreview(json));
             }
         } catch (JsonProcessingException ex) {
             throw new AiResponseParsingException(
-                    "AI response is not valid JSON: " + json, ex);
+                    "AI response is not valid JSON: " + safePreview(json), ex);
         }
     }
 }

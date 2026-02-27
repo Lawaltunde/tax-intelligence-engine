@@ -1,6 +1,7 @@
 package com.devlawal.wealthsimpleatie.ai;
 
 import com.devlawal.wealthsimpleatie.model.Province;
+import com.devlawal.wealthsimpleatie.exception.AiResponseParsingException;
 import com.devlawal.wealthsimpleatie.util.JsonResponseValidator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.slf4j.Logger;
@@ -93,6 +94,14 @@ public class ProvincialPolicyAgent {
                 .user(prompt)
                 .call()
                 .content();
+
+        if (rawResponse == null || rawResponse.isBlank()) {
+            log.error("AI returned null/blank response for provincial analysis: province={}, taxYear={}",
+                    province, taxYear);
+            throw new AiResponseParsingException(
+                    "Provincial policy AI returned an empty response for province=" + province
+                    + ", taxYear=" + taxYear);
+        }
 
         log.debug("Raw AI provincial response: {}", rawResponse);
 

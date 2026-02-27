@@ -86,6 +86,7 @@ public final class TaxBracketCalculator {
      * @return marginal rate as a fraction (e.g. 0.205)
      */
     public static double marginalRate(double taxableIncome) {
+        if (taxableIncome <= 0)              return 0.0;
         if (taxableIncome <= BRACKET_1_TOP)  return RATE_1;
         if (taxableIncome <= BRACKET_2_TOP)  return RATE_2;
         if (taxableIncome <= BRACKET_3_TOP)  return RATE_3;

@@ -17,6 +17,12 @@ import java.io.InputStream;
 @Component
 public class PdfTextExtractor {
 
+    /** Maximum accepted file size: 20 MB. Rejects abnormally large uploads before reading. */
+    private static final long MAX_FILE_BYTES = 20L * 1024 * 1024;
+
+    /** PDF magic header bytes (%PDF-). */
+    private static final byte[] PDF_MAGIC = {'%', 'P', 'D', 'F', '-'};
+
     /**
      * Extracts all text content from the supplied PDF multipart file.
      *
@@ -26,8 +32,14 @@ public class PdfTextExtractor {
      */
     public String extract(MultipartFile file) {
         validateContentType(file);
+        if (file.getSize() > MAX_FILE_BYTES) {
+            throw new DocumentExtractionException(
+                    "File '%s' exceeds the maximum allowed size of 20 MB (%d bytes)."
+                            .formatted(file.getOriginalFilename(), file.getSize()));
+        }
         try (InputStream is = file.getInputStream()) {
             byte[] bytes = is.readAllBytes();
+            validatePdfSignature(bytes, file.getOriginalFilename());
             try (PDDocument doc = Loader.loadPDF(bytes)) {
 
                 PDFTextStripper stripper = new PDFTextStripper();
@@ -52,6 +64,23 @@ public class PdfTextExtractor {
         if (contentType == null || !contentType.equalsIgnoreCase("application/pdf")) {
             throw new DocumentExtractionException(
                     "Unsupported file type '%s'. Only PDF files are accepted.".formatted(contentType));
+        }
+    }
+
+    /**
+     * Verifies the PDF magic header (%PDF-) as a second-layer defence against
+     * content-type spoofing (client-controlled header cannot be trusted alone).
+     */
+    private void validatePdfSignature(byte[] bytes, String filename) {
+        if (bytes.length < PDF_MAGIC.length) {
+            throw new DocumentExtractionException(
+                    "File '%s' is too small to be a valid PDF.".formatted(filename));
+        }
+        for (int i = 0; i < PDF_MAGIC.length; i++) {
+            if (bytes[i] != PDF_MAGIC[i]) {
+                throw new DocumentExtractionException(
+                        "File '%s' does not start with the PDF magic header — not a valid PDF.".formatted(filename));
+            }
         }
     }
 }

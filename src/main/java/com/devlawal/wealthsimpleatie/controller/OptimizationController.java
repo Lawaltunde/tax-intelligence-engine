@@ -4,6 +4,7 @@ import com.devlawal.wealthsimpleatie.dto.OptimizationResponseDto;
 import com.devlawal.wealthsimpleatie.model.OptimizationResult;
 import com.devlawal.wealthsimpleatie.model.TaxProfile;
 import com.devlawal.wealthsimpleatie.service.OptimizationService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -35,7 +36,7 @@ public class OptimizationController {
     @PostMapping("/rrsp")
     public ResponseEntity<OptimizationResponseDto> simulateRrsp(
             @RequestParam @Min(0) double additionalContrib,
-            @RequestBody TaxProfile profile) {
+            @Valid @RequestBody TaxProfile profile) {
 
         OptimizationResult result = optimizationService.simulateRrspContribution(profile, additionalContrib);
 

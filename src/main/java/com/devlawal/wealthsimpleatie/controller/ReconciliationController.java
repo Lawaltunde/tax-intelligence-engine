@@ -8,6 +8,7 @@ import com.devlawal.wealthsimpleatie.model.ReconciliationResult;
 import com.devlawal.wealthsimpleatie.model.TaxProfile;
 import com.devlawal.wealthsimpleatie.service.CraImportService;
 import com.devlawal.wealthsimpleatie.service.ReconciliationService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +40,7 @@ public class ReconciliationController {
      */
     @PostMapping("/run")
     public ResponseEntity<List<ReconciliationResponseDto>> run(
-            @RequestBody ReconciliationRequestDto request) {
+            @Valid @RequestBody ReconciliationRequestDto request) {
 
         // Reconstruct the domain TaxProfile from the DTO
         TaxProfile profile = TaxProfile.builder()

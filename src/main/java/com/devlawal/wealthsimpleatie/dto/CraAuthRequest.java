@@ -3,7 +3,7 @@ package com.devlawal.wealthsimpleatie.dto;
 /**
  * Credentials required to authenticate with the CRA Auto-fill My Return (AFR) service.
  *
- * All three fields are mandatory for CRA to authorize the data pull:
+ * All four fields are mandatory for CRA to authorize the data pull:
  *  - sin:             9-digit Social Insurance Number (no dashes)
  *  - dateOfBirth:     taxpayer DOB in ISO format (yyyy-MM-dd)
  *  - netfileAccessCode: 4-character alphanumeric code printed on the taxpayer's
@@ -25,5 +25,14 @@ public record CraAuthRequest(
                 : "***";
         return "CraAuthRequest{sin='%s', dob='%s', nac='****', taxYear='%s'}"
                 .formatted(maskedSin, dateOfBirth, taxYear);
+    }
+
+    /**
+     * Overrides auto-generated toString() to prevent SIN and NAC from leaking into logs.
+     * Always delegates to the masked representation.
+     */
+    @Override
+    public String toString() {
+        return toMaskedString();
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import java.util.Map;
 
@@ -59,6 +60,9 @@ public class CraAfrClient {
 
         log.info("CraAfrClient initialised — baseUrl={}, transmitter={}, certificationMode={}",
                 baseUrl, transmitterNumber, certificationMode);
+        if (!certificationMode) {
+            log.warn("CraAfrClient running WITHOUT CRA certification — live calls are disabled until certificationMode=true");
+        }
     }
 
     /**
@@ -135,6 +139,8 @@ public class CraAfrClient {
 
         } catch (HttpClientErrorException e) {
             throw new CraServiceException("CRA AFR data fetch failed: " + e.getMessage());
+        } catch (RestClientException e) {
+            throw new CraServiceException("CRA AFR request failed (server or network error): " + e.getMessage());
         }
     }
 }
