@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'react-hot-toast';
 import { ErrorBoundary }    from './components/ErrorBoundary';
 import Layout               from './components/Layout';
 import DashboardPage        from './pages/DashboardPage';
@@ -10,6 +11,7 @@ import OptimizationPage     from './pages/OptimizationPage';
 import RiskAssessmentPage   from './pages/RiskAssessmentPage';
 import ProvincialPolicyPage from './pages/ProvincialPolicyPage';
 import ReviewPage           from './pages/ReviewPage';
+import NotFoundPage         from './pages/NotFoundPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,10 +41,30 @@ export default function App() {
               <Route path="risk"       element={<RiskAssessmentPage />} />
               <Route path="provincial" element={<ProvincialPolicyPage />} />
               <Route path="review"     element={<ReviewPage />} />
+              <Route path="*"          element={<NotFoundPage />} />
             </Route>
           </Routes>
         </ErrorBoundary>
       </BrowserRouter>
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            fontFamily: 'Inter, system-ui, sans-serif',
+            fontSize: '0.875rem',
+            borderRadius: '8px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+          },
+          success: {
+            iconTheme: { primary: '#10b981', secondary: '#fff' },
+          },
+          error: {
+            iconTheme: { primary: '#ef4444', secondary: '#fff' },
+            duration: 6000,
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

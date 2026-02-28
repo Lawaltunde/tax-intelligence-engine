@@ -1,5 +1,6 @@
 import { useState, useId } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { runReconciliation } from '../api/endpoints';
 import type { ReconciliationRequestDto, ReconciliationResponseDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
@@ -18,6 +19,18 @@ export default function ReconciliationPage() {
   const { mutate, data: results, isPending, isError, error, reset } =
     useMutation<ReconciliationResponseDto[], Error, ReconciliationRequestDto>({
       mutationFn: runReconciliation,
+      onSuccess: (data) => {
+        if (data.length === 0) {
+          toast.success('No discrepancies — data matches CRA records.');
+        } else {
+          toast(`Found ${data.length} discrepanc${data.length === 1 ? 'y' : 'ies'} to review.`, {
+            icon: '⚠️',
+          });
+        }
+      },
+      onError: (err) => {
+        toast.error(`Reconciliation failed: ${err.message}`);
+      },
     });
 
   const setStr = (k: keyof ReconciliationRequestDto) =>
