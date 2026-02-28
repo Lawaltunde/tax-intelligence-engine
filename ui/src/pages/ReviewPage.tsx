@@ -87,12 +87,12 @@ export default function ReviewPage() {
           <form onSubmit={loadAudit} className="card form-card">
             <div className="field-row">
               <div className="field">
-                <label>Profile ID</label>
-                <input value={auditProfileId} onChange={e => setAuditProfileId(e.target.value)} placeholder="Required" />
+                <label htmlFor="audit-profile-id">Profile ID</label>
+                <input id="audit-profile-id" value={auditProfileId} onChange={e => setAuditProfileId(e.target.value)} placeholder="Required" />
               </div>
               <div className="field">
-                <label>Filter by Decision Type (optional)</label>
-                <select value={auditType} onChange={e => setAuditType(e.target.value as DecisionType | '')}>
+                <label htmlFor="audit-type">Filter by Decision Type (optional)</label>
+                <select id="audit-type" value={auditType} onChange={e => setAuditType(e.target.value as DecisionType | '')}>
                   <option value="">All types</option>
                   {DECISION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>

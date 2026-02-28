@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { analyseProvincialPolicy } from '../api/endpoints';
 import type { ProvincialPolicyRequest, ProvincialPolicyResponse, Province } from '../api/types';
 
@@ -40,6 +40,8 @@ export default function ProvincialPolicyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.profileId.trim()) { setError('Profile ID is required.'); return; }
+    if (!/^\d{4}$/.test(form.taxYear)) { setError('Tax Year must be a 4-digit year (e.g. 2024).'); return; }
     setLoading(true);
     setError(null);
     try {
@@ -58,12 +60,12 @@ export default function ProvincialPolicyPage() {
 
       <form onSubmit={handleSubmit} className="card form-card">
         <div className="field-row">
-          <div className="field"><label>Profile ID</label>
-            <input value={form.profileId} onChange={setStr('profileId')} /></div>
-          <div className="field"><label>Tax Year</label>
-            <input value={form.taxYear} onChange={setStr('taxYear')} maxLength={4} /></div>
-          <div className="field"><label>Province</label>
-            <select value={form.province} onChange={setStr('province')}>
+          <div className="field"><label htmlFor="prov-profileId">Profile ID</label>
+            <input id="prov-profileId" value={form.profileId} onChange={setStr('profileId')} required /></div>
+          <div className="field"><label htmlFor="prov-taxYear">Tax Year</label>
+            <input id="prov-taxYear" value={form.taxYear} onChange={setStr('taxYear')} maxLength={4} pattern="\d{4}" /></div>
+          <div className="field"><label htmlFor="prov-province">Province</label>
+            <select id="prov-province" value={form.province} onChange={setStr('province')}>
               {PROVINCES.map(p => <option key={p.code} value={p.code}>{p.name}</option>)}
             </select>
           </div>
@@ -128,10 +130,11 @@ export default function ProvincialPolicyPage() {
 }
 
 function NumField({ label, value, onChange }: { label: string; value: number; onChange: React.ChangeEventHandler<HTMLInputElement> }) {
+  const id = useId();
   return (
     <div className="field">
-      <label>{label}</label>
-      <input type="number" step="0.01" value={value} onChange={onChange} />
+      <label htmlFor={id}>{label}</label>
+      <input id={id} type="number" step="0.01" value={value} onChange={onChange} />
     </div>
   );
 }

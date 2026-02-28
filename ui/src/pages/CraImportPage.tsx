@@ -4,6 +4,7 @@ import type { CraImportDto } from '../api/types';
 
 export default function CraImportPage() {
   const [form, setForm]       = useState({ sin: '', dateOfBirth: '', netfileAccessCode: '', taxYear: '2024' });
+  const [showSin, setShowSin] = useState(false);
   const [result, setResult]   = useState<CraImportDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState<string | null>(null);
@@ -35,20 +36,41 @@ export default function CraImportPage() {
 
       <form onSubmit={handleSubmit} className="card form-card">
         <div className="field">
-          <label>SIN (9 digits, no dashes)</label>
-          <input type="text" value={form.sin} onChange={set('sin')} placeholder="123456789" maxLength={9} />
+          <label htmlFor="cra-sin">SIN (9 digits, no dashes)</label>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input
+              id="cra-sin"
+              type={showSin ? 'text' : 'password'}
+              value={form.sin}
+              onChange={set('sin')}
+              placeholder="123456789"
+              maxLength={9}
+              inputMode="numeric"
+              pattern="\d{9}"
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              onClick={() => setShowSin(s => !s)}
+              style={{ padding: '4px 10px', fontSize: '0.8rem', cursor: 'pointer',
+                       border: '1px solid #d1d5db', borderRadius: 6, background: '#f9fafb' }}
+              aria-label={showSin ? 'Hide SIN' : 'Show SIN'}
+            >
+              {showSin ? 'Hide' : 'Show'}
+            </button>
+          </div>
         </div>
         <div className="field">
-          <label>Date of Birth</label>
-          <input type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} />
+          <label htmlFor="cra-dob">Date of Birth</label>
+          <input id="cra-dob" type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} />
         </div>
         <div className="field">
-          <label>NETFILE Access Code (4 characters)</label>
-          <input type="text" value={form.netfileAccessCode} onChange={set('netfileAccessCode')} placeholder="AB12" maxLength={4} />
+          <label htmlFor="cra-nac">NETFILE Access Code (4 characters)</label>
+          <input id="cra-nac" type="text" value={form.netfileAccessCode} onChange={set('netfileAccessCode')} placeholder="AB12" maxLength={4} />
         </div>
         <div className="field">
-          <label>Tax Year</label>
-          <input type="text" value={form.taxYear} onChange={set('taxYear')} placeholder="2024" maxLength={4} />
+          <label htmlFor="cra-taxYear">Tax Year</label>
+          <input id="cra-taxYear" type="text" value={form.taxYear} onChange={set('taxYear')} placeholder="2024" maxLength={4} />
         </div>
         <button type="submit" disabled={loading} className="btn-primary">
           {loading ? 'Importing…' : 'Import from CRA'}

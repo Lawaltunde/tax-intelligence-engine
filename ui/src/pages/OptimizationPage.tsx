@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { simulateRrsp } from '../api/endpoints';
 import type { TaxProfileBody, OptimizationResponseDto } from '../api/types';
 
@@ -99,10 +99,11 @@ export default function OptimizationPage() {
 }
 
 function NumField({ label, value, onChange }: { label: string; value: number; onChange: React.ChangeEventHandler<HTMLInputElement> }) {
+  const id = useId();
   return (
     <div className="field">
-      <label>{label}</label>
-      <input type="number" step="0.01" value={value} onChange={onChange} />
+      <label htmlFor={id}>{label}</label>
+      <input id={id} type="number" step="0.01" value={value} onChange={onChange} />
     </div>
   );
 }

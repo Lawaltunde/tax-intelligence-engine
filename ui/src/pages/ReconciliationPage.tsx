@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { runReconciliation } from '../api/endpoints';
 import type { ReconciliationRequestDto, ReconciliationResponseDto } from '../api/types';
 
@@ -48,7 +48,14 @@ export default function ReconciliationPage() {
           <div className="field"><label>Profile ID</label>
             <input value={form.profileId} onChange={setStr('profileId')} placeholder="From document upload" /></div>
           <div className="field"><label>SIN (9 digits)</label>
-            <input value={form.sin} onChange={setStr('sin')} placeholder="123456789" maxLength={9} /></div>
+            <input
+              type="password"
+              value={form.sin}
+              onChange={setStr('sin')}
+              placeholder="123456789"
+              maxLength={9}
+              autoComplete="off"
+            /></div>
           <div className="field"><label>Tax Year</label>
             <input value={form.taxYear} onChange={setStr('taxYear')} maxLength={4} /></div>
         </div>
@@ -86,7 +93,7 @@ export default function ReconciliationPage() {
                 </thead>
                 <tbody>
                   {results.map((r, i) => (
-                    <tr key={i} className={`sev-${r.severity.toLowerCase()}`}>
+                    <tr key={i} className={`sev-${r.severity ? r.severity.toLowerCase() : 'unknown'}`}>
                       <td>{r.field}</td>
                       <td>{fmt(r.uploadedValue)}</td>
                       <td>{fmt(r.craValue)}</td>
@@ -107,10 +114,11 @@ export default function ReconciliationPage() {
 }
 
 function NumField({ label, value, onChange }: { label: string; value: number; onChange: React.ChangeEventHandler<HTMLInputElement> }) {
+  const id = useId();
   return (
     <div className="field">
-      <label>{label}</label>
-      <input type="number" step="0.01" value={value} onChange={onChange} />
+      <label htmlFor={id}>{label}</label>
+      <input id={id} type="number" step="0.01" value={value} onChange={onChange} />
     </div>
   );
 }

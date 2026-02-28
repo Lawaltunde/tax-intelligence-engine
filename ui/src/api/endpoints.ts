@@ -27,10 +27,10 @@ export const extractDocument = (file: File, taxYear: string) => {
   const form = new FormData();
   form.append('file', file);
   form.append('taxYear', taxYear);
+  // Do NOT set Content-Type manually — axios must auto-set multipart/form-data
+  // with the correct boundary when the body is a FormData instance.
   return api
-    .post<ExtractedProfileDto>('/api/v1/documents/extract', form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    .post<ExtractedProfileDto>('/api/v1/documents/extract', form)
     .then(r => r.data);
 };
 

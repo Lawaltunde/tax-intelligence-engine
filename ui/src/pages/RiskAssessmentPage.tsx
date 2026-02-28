@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { assessRisk } from '../api/endpoints';
 import type { RiskAssessmentRequestDto, RiskResponseDto } from '../api/types';
 
@@ -45,10 +45,10 @@ export default function RiskAssessmentPage() {
 
       <form onSubmit={handleSubmit} className="card form-card">
         <div className="field-row">
-          <div className="field"><label>Profile ID</label>
-            <input value={form.profileId} onChange={setStr('profileId')} /></div>
-          <div className="field"><label>Tax Year</label>
-            <input value={form.taxYear} onChange={setStr('taxYear')} maxLength={4} /></div>
+          <div className="field"><label htmlFor="risk-profileId">Profile ID</label>
+            <input id="risk-profileId" value={form.profileId} onChange={setStr('profileId')} /></div>
+          <div className="field"><label htmlFor="risk-taxYear">Tax Year</label>
+            <input id="risk-taxYear" value={form.taxYear} onChange={setStr('taxYear')} maxLength={4} /></div>
         </div>
         <div className="field-row">
           <NumField label="Employment Income"   value={form.employmentIncome}        onChange={setNum('employmentIncome')} />
@@ -108,10 +108,11 @@ export default function RiskAssessmentPage() {
 }
 
 function NumField({ label, value, onChange }: { label: string; value: number; onChange: React.ChangeEventHandler<HTMLInputElement> }) {
+  const id = useId();
   return (
     <div className="field">
-      <label>{label}</label>
-      <input type="number" step="0.01" value={value} onChange={onChange} />
+      <label htmlFor={id}>{label}</label>
+      <input id={id} type="number" step="0.01" value={value} onChange={onChange} />
     </div>
   );
 }

@@ -19,7 +19,7 @@ export default function DashboardPage() {
       <div className="dashboard-grid">
         {cards.map(c => (
           <a key={c.to} href={c.to} className="dash-card">
-            <span className="dash-icon">{c.icon}</span>
+            <span className="dash-icon" aria-hidden="true">{c.icon}</span>
             <h3>{c.title}</h3>
             <p>{c.desc}</p>
           </a>

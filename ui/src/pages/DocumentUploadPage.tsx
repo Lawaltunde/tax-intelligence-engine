@@ -14,6 +14,7 @@ export default function DocumentUploadPage() {
     if (!file) return;
     setLoading(true);
     setError(null);
+    setResult(null);
     try {
       const data = await extractDocument(file, taxYear);
       setResult(data);
@@ -72,12 +73,19 @@ export default function DocumentUploadPage() {
           <h3>Confidence Scores</h3>
           <table>
             <tbody>
-              {Object.entries(result.confidenceScores).map(([k, v]) => (
-                <tr key={k}>
-                  <td>{camel(k)}</td>
-                  <td><ConfidenceBar value={v as number} /></td>
-                </tr>
-              ))}
+              {Object.entries(
+                typeof result.confidenceScores === 'object' && result.confidenceScores != null
+                  ? result.confidenceScores
+                  : {}
+              ).map(([k, v]) => {
+                const score = Number(v);
+                return (
+                  <tr key={k}>
+                    <td>{camel(k)}</td>
+                    <td><ConfidenceBar value={isFinite(score) ? score : 0} /></td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

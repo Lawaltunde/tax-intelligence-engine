@@ -76,6 +76,10 @@ a { text-decoration: none; color: inherit; }
 }
 .btn-primary:hover    { background: #1e40af; }
 .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+.btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px #2563eb;
+}
 
 /* ── Error / success ──────────────────────────────────────────────────────── */
 .error   { color: #dc2626; font-size: 0.875rem; margin-top: 4px; }
@@ -145,4 +149,10 @@ th { font-weight: 600; color: #374151; background: #f9fafb; }
 }
 .tab:hover { color: #1d4ed8; }
 .tab.active { color: #1d4ed8; border-bottom-color: #1d4ed8; }
+.tab:focus-visible {
+  outline: none;
+  color: #1d4ed8;
+  border-bottom-color: #2563eb;
+  box-shadow: 0 0 0 2px #bfdbfe inset;
+}
 
