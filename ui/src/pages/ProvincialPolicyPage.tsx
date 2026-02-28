@@ -63,7 +63,7 @@ export default function ProvincialPolicyPage() {
           <div className="field"><label htmlFor="prov-profileId">Profile ID</label>
             <input id="prov-profileId" value={form.profileId} onChange={setStr('profileId')} required /></div>
           <div className="field"><label htmlFor="prov-taxYear">Tax Year</label>
-            <input id="prov-taxYear" value={form.taxYear} onChange={setStr('taxYear')} maxLength={4} pattern="\d{4}" /></div>
+            <input id="prov-taxYear" value={form.taxYear} onChange={setStr('taxYear')} maxLength={4} pattern="\d{4}" required /></div>
           <div className="field"><label htmlFor="prov-province">Province</label>
             <select id="prov-province" value={form.province} onChange={setStr('province')}>
               {PROVINCES.map(p => <option key={p.code} value={p.code}>{p.name}</option>)}
