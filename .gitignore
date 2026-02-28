@@ -39,3 +39,6 @@ build/
 ui/node_modules/
 ui/dist/
 ui/.env
+
+### Local dev notes ###
+PROJECT.md
