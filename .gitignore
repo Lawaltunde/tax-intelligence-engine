@@ -35,3 +35,7 @@ build/
 ### Environment / Secrets ###
 .env
 
+### Frontend ###
+ui/node_modules/
+ui/dist/
+ui/.env
