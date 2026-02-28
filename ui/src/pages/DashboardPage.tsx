@@ -11,17 +11,42 @@ export default function DashboardPage() {
 
   return (
     <div className="page">
-      <h1>AI Tax Intelligence Engine</h1>
-      <p className="subtitle">
-        Canadian tax AI assistant — document ingestion, CRA reconciliation,
-        RRSP optimization, risk assessment, and provincial policy analysis.
-      </p>
+      <div className="dashboard-hero">
+        <div className="dashboard-hero-content">
+          <h1>AI Tax <span>Intelligence</span> Engine</h1>
+          <p>
+            Canadian tax AI assistant — document ingestion, CRA reconciliation,
+            RRSP optimization, risk assessment, and provincial policy analysis.
+          </p>
+          <div className="hero-stats">
+            <div className="hero-stat">
+              <span className="hero-stat-value">7</span>
+              <span className="hero-stat-label">AI Modules</span>
+            </div>
+            <div className="hero-stat">
+              <span className="hero-stat-value">GPT-4o</span>
+              <span className="hero-stat-label">AI Model</span>
+            </div>
+            <div className="hero-stat">
+              <span className="hero-stat-value">Mock</span>
+              <span className="hero-stat-label">CRA Mode</span>
+            </div>
+            <div className="hero-stat">
+              <span className="hero-stat-value">CA</span>
+              <span className="hero-stat-label">Tax Jurisdiction</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p className="dashboard-section-label">Available Modules</p>
       <div className="dashboard-grid">
         {cards.map(c => (
           <a key={c.to} href={c.to} className="dash-card">
-            <span className="dash-icon" aria-hidden="true">{c.icon}</span>
+            <div className="dash-icon-wrap" aria-hidden="true">{c.icon}</div>
             <h3>{c.title}</h3>
             <p>{c.desc}</p>
+            <span className="dash-card-arrow" aria-hidden="true">→</span>
           </a>
         ))}
       </div>
