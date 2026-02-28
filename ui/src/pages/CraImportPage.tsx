@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { importFromCra } from '../api/endpoints';
 import type { CraImportDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
+import InlineMessage from '../components/InlineMessage';
 
 export default function CraImportPage() {
   const [form, setForm]       = useState({ sin: '', dateOfBirth: '', netfileAccessCode: '', taxYear: '2024' });
@@ -71,7 +72,7 @@ export default function CraImportPage() {
         <button type="submit" disabled={isPending} className="btn-primary">
           {isPending ? 'Importing…' : 'Import from CRA'}
         </button>
-        {isError && <p className="error">{error.message}</p>}
+        {isError && <InlineMessage variant="error">{error.message}</InlineMessage>}
       </form>
 
       {isPending && <CardSkeleton />}

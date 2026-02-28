@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { analyseProvincialPolicy } from '../api/endpoints';
 import type { ProvincialPolicyRequest, ProvincialPolicyResponse, Province } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
+import InlineMessage from '../components/InlineMessage';
 
 const PROVINCES: { code: Province; name: string }[] = [
   { code: 'AB', name: 'Alberta' },
@@ -45,8 +46,8 @@ export default function ProvincialPolicyPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.profileId.trim()) { setValidationError('Profile ID is required.'); return; }
-    if (!/^\d{4}$/.test(form.taxYear)) { setValidationError('Tax Year must be a 4-digit year (e.g. 2024).'); return; }
+    if (!form.profileId.trim()) { reset(); setValidationError('Profile ID is required.'); return; }
+    if (!/^\d{4}$/.test(form.taxYear)) { reset(); setValidationError('Tax Year must be a 4-digit year (e.g. 2024).'); return; }
     setValidationError(null);
     reset();
     mutate(form);
@@ -90,8 +91,8 @@ export default function ProvincialPolicyPage() {
         <button type="submit" disabled={isPending} className="btn-primary">
           {isPending ? 'Analysing…' : 'Analyse'}
         </button>
-        {validationError && <p className="error">{validationError}</p>}
-        {isError && <p className="error">{error.message}</p>}
+        {validationError && <InlineMessage variant="error">{validationError}</InlineMessage>}
+        {isError && <InlineMessage variant="error">{error.message}</InlineMessage>}
       </form>
 
       {isPending && <CardSkeleton />}

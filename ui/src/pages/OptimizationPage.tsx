@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { simulateRrsp } from '../api/endpoints';
 import type { TaxProfileBody, OptimizationResponseDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
+import InlineMessage from '../components/InlineMessage';
 
 const EMPTY: TaxProfileBody = {
   profileId: '', taxYear: '2024',
@@ -64,7 +65,7 @@ export default function OptimizationPage() {
         <button type="submit" disabled={isPending} className="btn-primary">
           {isPending ? 'Simulating…' : 'Simulate'}
         </button>
-        {isError && <p className="error">{error.message}</p>}
+        {isError && <InlineMessage variant="error">{error.message}</InlineMessage>}
       </form>
 
       {isPending && <CardSkeleton />}

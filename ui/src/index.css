@@ -279,20 +279,28 @@ button, input, select, textarea { font-family: inherit; }
 .btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--brand-500); }
 
 /* ── Inline messages ──────────────────────────────────────────────────────── */
+/* Icons are rendered as aria-hidden SVG elements in the markup (InlineMessage
+   component). ::before pseudo-elements are intentionally absent — icon spacing
+   is handled via the flex gap below. */
 .error {
-  display: flex; align-items: flex-start; gap: 7px;
+  display: flex; align-items: flex-start; gap: 8px;
   color: var(--red-700); background: var(--red-100);
   border: 1px solid #fca5a5; border-radius: var(--radius-sm);
   padding: 9px 12px; font-size: 0.84rem; font-weight: 500; margin-top: 4px;
 }
-.error::before { content: '⚠'; flex-shrink: 0; }
 .success {
-  display: flex; align-items: center; gap: 7px;
+  display: flex; align-items: center; gap: 8px;
   color: var(--green-700); background: var(--green-100);
   border: 1px solid #86efac; border-radius: var(--radius-sm);
   padding: 9px 12px; font-size: 0.84rem; font-weight: 500;
 }
-.success::before { content: '✓'; flex-shrink: 0; }
+
+/* ── Visually hidden (screen-reader only) ────────────────────────────────── */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border-width: 0;
+}
 
 /* ── Tables ───────────────────────────────────────────────────────────────── */
 table { width: 100%; border-collapse: collapse; font-size: 0.855rem; margin-top: 14px; }

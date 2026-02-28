@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { assessRisk } from '../api/endpoints';
 import type { RiskAssessmentRequestDto, RiskResponseDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
+import InlineMessage from '../components/InlineMessage';
 
 const EMPTY: RiskAssessmentRequestDto = {
   profileId: '', taxYear: '2024',
@@ -70,7 +71,7 @@ export default function RiskAssessmentPage() {
         <button type="submit" disabled={isPending} className="btn-primary">
           {isPending ? 'Assessing…' : 'Assess Risk'}
         </button>
-        {isError && <p className="error">{error.message}</p>}
+        {isError && <InlineMessage variant="error">{error.message}</InlineMessage>}
       </form>
 
       {isPending && <CardSkeleton />}

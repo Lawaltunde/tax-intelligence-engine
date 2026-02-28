@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { runReconciliation } from '../api/endpoints';
 import type { ReconciliationRequestDto, ReconciliationResponseDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
+import InlineMessage from '../components/InlineMessage';
 
 const EMPTY: ReconciliationRequestDto = {
   profileId: '', sin: '', taxYear: '2024',
@@ -72,7 +73,7 @@ export default function ReconciliationPage() {
         <button type="submit" disabled={isPending} className="btn-primary">
           {isPending ? 'Reconciling…' : 'Run Reconciliation'}
         </button>
-        {isError && <p className="error">{error.message}</p>}
+        {isError && <InlineMessage variant="error">{error.message}</InlineMessage>}
       </form>
 
       {isPending && <CardSkeleton />}
@@ -81,7 +82,7 @@ export default function ReconciliationPage() {
         <div className="card result-card">
           <h2>Results</h2>
           {!hasFinding
-            ? <p className="success">✓ No discrepancies found — your data matches CRA records.</p>
+            ? <InlineMessage variant="success">No discrepancies found — your data matches CRA records.</InlineMessage>
             : (
               <table className="results-table">
                 <thead>

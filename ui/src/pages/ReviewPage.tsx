@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { getAllPendingReview, getAuditTrail } from '../api/endpoints';
 import type { ReviewItemDto, AuditLogDto, DecisionType } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
+import InlineMessage from '../components/InlineMessage';
 
 const DECISION_TYPES: DecisionType[] = [
   'RECONCILIATION', 'OPTIMIZATION', 'RISK_ASSESSMENT', 'PROVINCIAL_POLICY', 'EXTRACTION',
@@ -71,12 +72,12 @@ export default function ReviewPage() {
             {pendingLoading ? 'Loading…' : 'Refresh'}
           </button>
 
-          {pendingIsError && <p className="error">{pendingError.message}</p>}
+          {pendingIsError && <InlineMessage variant="error">{pendingError.message}</InlineMessage>}
           {pendingLoading && <CardSkeleton />}
 
           {pendingItems !== undefined && !pendingLoading && (
             pendingItems.length === 0
-              ? <p className="success">✓ No items currently require human review.</p>
+              ? <InlineMessage variant="success">No items currently require human review.</InlineMessage>
               : (
                 <div className="card">
                   <table className="results-table">
@@ -121,14 +122,14 @@ export default function ReviewPage() {
             <button type="submit" disabled={auditLoading || !auditProfileId} className="btn-primary">
               {auditLoading ? 'Loading…' : 'Load Audit Trail'}
             </button>
-            {auditIsError && <p className="error">{auditError.message}</p>}
+            {auditIsError && <InlineMessage variant="error">{auditError.message}</InlineMessage>}
           </form>
 
           {auditLoading && <CardSkeleton />}
 
           {auditItems !== undefined && !auditLoading && (
             auditItems.length === 0
-              ? <p className="success">No audit entries found for this profile / filter.</p>
+              ? <InlineMessage variant="success">No audit entries found for this profile / filter.</InlineMessage>
               : (
                 <div className="card">
                   <table className="results-table">

@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { extractDocument } from '../api/endpoints';
 import type { ExtractedProfileDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
+import InlineMessage from '../components/InlineMessage';
 
 export default function DocumentUploadPage() {
   const [file, setFile]       = useState<File | null>(null);
@@ -47,7 +48,7 @@ export default function DocumentUploadPage() {
         <button type="submit" disabled={!file || isPending} className="btn-primary">
           {isPending ? 'Extracting…' : 'Extract'}
         </button>
-        {isError && <p className="error">{error.message}</p>}
+        {isError && <InlineMessage variant="error">{error.message}</InlineMessage>}
       </form>
 
       {isPending && <CardSkeleton />}
