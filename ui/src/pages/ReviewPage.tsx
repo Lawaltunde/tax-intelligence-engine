@@ -1,35 +1,48 @@
 import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { getAllPendingReview, getAuditTrail } from '../api/endpoints';
 import type { ReviewItemDto, AuditLogDto, DecisionType } from '../api/types';
+import { CardSkeleton } from '../components/Skeleton';
 
 const DECISION_TYPES: DecisionType[] = [
   'RECONCILIATION', 'OPTIMIZATION', 'RISK_ASSESSMENT', 'PROVINCIAL_POLICY', 'EXTRACTION',
 ];
 
 export default function ReviewPage() {
-  const [tab, setTab]                     = useState<'pending' | 'audit'>('pending');
-  const [pendingItems, setPendingItems]   = useState<ReviewItemDto[] | null>(null);
-  const [auditItems, setAuditItems]       = useState<AuditLogDto[] | null>(null);
+  const [tab, setTab]                       = useState<'pending' | 'audit'>('pending');
   const [auditProfileId, setAuditProfileId] = useState('');
-  const [auditType, setAuditType]         = useState<DecisionType | ''>('');
-  const [loading, setLoading]             = useState(false);
-  const [error, setError]                 = useState<string | null>(null);
+  const [auditType, setAuditType]           = useState<DecisionType | ''>('');
 
-  const loadPending = async () => {
-    setLoading(true); setError(null);
-    try { setPendingItems(await getAllPendingReview()); }
-    catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed'); }
-    finally { setLoading(false); }
-  };
+  // ── Pending Review — auto-fetched whenever the 'pending' tab is active ──────
+  const {
+    data: pendingItems,
+    isFetching: pendingLoading,
+    isError: pendingIsError,
+    error: pendingError,
+    refetch: refetchPending,
+  } = useQuery<ReviewItemDto[], Error>({
+    queryKey: ['pending-review'],
+    queryFn: getAllPendingReview,
+    enabled: tab === 'pending',   // only fetch while on this tab
+  });
 
-  const loadAudit = async (e: React.FormEvent) => {
+  // ── Audit Trail — triggered on form submit ───────────────────────────────────
+  const {
+    mutate: loadAudit,
+    data: auditItems,
+    isPending: auditLoading,
+    isError: auditIsError,
+    error: auditError,
+    reset: resetAudit,
+  } = useMutation<AuditLogDto[], Error, { profileId: string; type?: DecisionType }>({
+    mutationFn: ({ profileId, type }) => getAuditTrail(profileId, type),
+  });
+
+  const handleAuditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!auditProfileId) return;
-    setLoading(true); setError(null);
-    try {
-      setAuditItems(await getAuditTrail(auditProfileId, auditType || undefined));
-    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Failed'); }
-    finally { setLoading(false); }
+    resetAudit();
+    loadAudit({ profileId: auditProfileId, type: auditType || undefined });
   };
 
   const sevColor: Record<string, string> = { LOW: '#22c55e', MEDIUM: '#f59e0b', HIGH: '#ef4444' };
@@ -47,14 +60,21 @@ export default function ReviewPage() {
         </button>
       </div>
 
-      {error && <p className="error">{error}</p>}
-
       {tab === 'pending' && (
         <div>
-          <button onClick={loadPending} disabled={loading} className="btn-primary" style={{ marginBottom: 16 }}>
-            {loading ? 'Loading…' : 'Load All Pending Items'}
+          <button
+            onClick={() => refetchPending()}
+            disabled={pendingLoading}
+            className="btn-primary"
+            style={{ marginBottom: 16 }}
+          >
+            {pendingLoading ? 'Loading…' : 'Refresh'}
           </button>
-          {pendingItems !== null && (
+
+          {pendingIsError && <p className="error">{pendingError.message}</p>}
+          {pendingLoading && <CardSkeleton />}
+
+          {pendingItems !== undefined && !pendingLoading && (
             pendingItems.length === 0
               ? <p className="success">✓ No items currently require human review.</p>
               : (
@@ -84,7 +104,7 @@ export default function ReviewPage() {
 
       {tab === 'audit' && (
         <div>
-          <form onSubmit={loadAudit} className="card form-card">
+          <form onSubmit={handleAuditSubmit} className="card form-card">
             <div className="field-row">
               <div className="field">
                 <label htmlFor="audit-profile-id">Profile ID</label>
@@ -98,12 +118,15 @@ export default function ReviewPage() {
                 </select>
               </div>
             </div>
-            <button type="submit" disabled={loading || !auditProfileId} className="btn-primary">
-              {loading ? 'Loading…' : 'Load Audit Trail'}
+            <button type="submit" disabled={auditLoading || !auditProfileId} className="btn-primary">
+              {auditLoading ? 'Loading…' : 'Load Audit Trail'}
             </button>
+            {auditIsError && <p className="error">{auditError.message}</p>}
           </form>
 
-          {auditItems !== null && (
+          {auditLoading && <CardSkeleton />}
+
+          {auditItems !== undefined && !auditLoading && (
             auditItems.length === 0
               ? <p className="success">No audit entries found for this profile / filter.</p>
               : (

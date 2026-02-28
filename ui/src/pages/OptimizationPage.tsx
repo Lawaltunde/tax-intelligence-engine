@@ -1,6 +1,8 @@
 import { useState, useId } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { simulateRrsp } from '../api/endpoints';
 import type { TaxProfileBody, OptimizationResponseDto } from '../api/types';
+import { CardSkeleton } from '../components/Skeleton';
 
 const EMPTY: TaxProfileBody = {
   profileId: '', taxYear: '2024',
@@ -10,11 +12,13 @@ const EMPTY: TaxProfileBody = {
 };
 
 export default function OptimizationPage() {
-  const [profile, setProfile]     = useState<TaxProfileBody>(EMPTY);
-  const [contrib, setContrib]     = useState<number>(5000);
-  const [result, setResult]       = useState<OptimizationResponseDto | null>(null);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState<string | null>(null);
+  const [profile, setProfile] = useState<TaxProfileBody>(EMPTY);
+  const [contrib, setContrib] = useState<number>(5000);
+
+  const { mutate, data: result, isPending, isError, error, reset } =
+    useMutation<OptimizationResponseDto, Error, { profile: TaxProfileBody; contrib: number }>({
+      mutationFn: ({ profile, contrib }) => simulateRrsp(profile, contrib),
+    });
 
   const setStr = (k: keyof TaxProfileBody) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -24,17 +28,10 @@ export default function OptimizationPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setProfile(p => ({ ...p, [k]: parseFloat(e.target.value) || 0 }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      setResult(await simulateRrsp(profile, contrib));
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Optimization failed');
-    } finally {
-      setLoading(false);
-    }
+    reset();
+    mutate({ profile, contrib });
   };
 
   return (
@@ -64,11 +61,13 @@ export default function OptimizationPage() {
           <input type="number" step="100" min="0" value={contrib}
             onChange={e => setContrib(parseFloat(e.target.value) || 0)} />
         </div>
-        <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? 'Simulating…' : 'Simulate'}
+        <button type="submit" disabled={isPending} className="btn-primary">
+          {isPending ? 'Simulating…' : 'Simulate'}
         </button>
-        {error && <p className="error">{error}</p>}
+        {isError && <p className="error">{error.message}</p>}
       </form>
+
+      {isPending && <CardSkeleton />}
 
       {result && (
         <div className="card result-card">

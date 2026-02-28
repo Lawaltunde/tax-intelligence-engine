@@ -1,6 +1,8 @@
 import { useState, useId } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { assessRisk } from '../api/endpoints';
 import type { RiskAssessmentRequestDto, RiskResponseDto } from '../api/types';
+import { CardSkeleton } from '../components/Skeleton';
 
 const EMPTY: RiskAssessmentRequestDto = {
   profileId: '', taxYear: '2024',
@@ -10,10 +12,12 @@ const EMPTY: RiskAssessmentRequestDto = {
 };
 
 export default function RiskAssessmentPage() {
-  const [form, setForm]       = useState<RiskAssessmentRequestDto>(EMPTY);
-  const [result, setResult]   = useState<RiskResponseDto | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+  const [form, setForm] = useState<RiskAssessmentRequestDto>(EMPTY);
+
+  const { mutate, data: result, isPending, isError, error, reset } =
+    useMutation<RiskResponseDto, Error, RiskAssessmentRequestDto>({
+      mutationFn: assessRisk,
+    });
 
   const setStr = (k: keyof RiskAssessmentRequestDto) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -23,17 +27,10 @@ export default function RiskAssessmentPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm(f => ({ ...f, [k]: parseFloat(e.target.value) || 0 }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      setResult(await assessRisk(form));
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Risk assessment failed');
-    } finally {
-      setLoading(false);
-    }
+    reset();
+    mutate(form);
   };
 
   const riskColor: Record<string, string> = { LOW: '#22c55e', MEDIUM: '#f59e0b', HIGH: '#ef4444' };
@@ -70,11 +67,13 @@ export default function RiskAssessmentPage() {
             {' '}Prior reconciliation found discrepancies
           </label>
         </div>
-        <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? 'Assessing…' : 'Assess Risk'}
+        <button type="submit" disabled={isPending} className="btn-primary">
+          {isPending ? 'Assessing…' : 'Assess Risk'}
         </button>
-        {error && <p className="error">{error}</p>}
+        {isError && <p className="error">{error.message}</p>}
       </form>
+
+      {isPending && <CardSkeleton />}
 
       {result && (
         <div className="card result-card">

@@ -1,6 +1,8 @@
 import { useState, useId } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { runReconciliation } from '../api/endpoints';
 import type { ReconciliationRequestDto, ReconciliationResponseDto } from '../api/types';
+import { CardSkeleton } from '../components/Skeleton';
 
 const EMPTY: ReconciliationRequestDto = {
   profileId: '', sin: '', taxYear: '2024',
@@ -10,10 +12,12 @@ const EMPTY: ReconciliationRequestDto = {
 };
 
 export default function ReconciliationPage() {
-  const [form, setForm]       = useState<ReconciliationRequestDto>(EMPTY);
-  const [results, setResults] = useState<ReconciliationResponseDto[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+  const [form, setForm] = useState<ReconciliationRequestDto>(EMPTY);
+
+  const { mutate, data: results, isPending, isError, error, reset } =
+    useMutation<ReconciliationResponseDto[], Error, ReconciliationRequestDto>({
+      mutationFn: runReconciliation,
+    });
 
   const setStr = (k: keyof ReconciliationRequestDto) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -23,17 +27,10 @@ export default function ReconciliationPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm(f => ({ ...f, [k]: parseFloat(e.target.value) || 0 }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      setResults(await runReconciliation(form));
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Reconciliation failed');
-    } finally {
-      setLoading(false);
-    }
+    reset();
+    mutate(form);
   };
 
   const hasFinding = results && results.length > 0;
@@ -72,11 +69,13 @@ export default function ReconciliationPage() {
         <div className="field-row">
           <NumField label="Prior Year Income"         value={form.priorYearIncome}         onChange={setNum('priorYearIncome')} />
         </div>
-        <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? 'Reconciling…' : 'Run Reconciliation'}
+        <button type="submit" disabled={isPending} className="btn-primary">
+          {isPending ? 'Reconciling…' : 'Run Reconciliation'}
         </button>
-        {error && <p className="error">{error}</p>}
+        {isError && <p className="error">{error.message}</p>}
       </form>
+
+      {isPending && <CardSkeleton />}
 
       {results !== null && (
         <div className="card result-card">

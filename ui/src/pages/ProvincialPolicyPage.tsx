@@ -1,6 +1,8 @@
 import { useState, useId } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { analyseProvincialPolicy } from '../api/endpoints';
 import type { ProvincialPolicyRequest, ProvincialPolicyResponse, Province } from '../api/types';
+import { CardSkeleton } from '../components/Skeleton';
 
 const PROVINCES: { code: Province; name: string }[] = [
   { code: 'AB', name: 'Alberta' },
@@ -25,10 +27,13 @@ const EMPTY: ProvincialPolicyRequest = {
 };
 
 export default function ProvincialPolicyPage() {
-  const [form, setForm]       = useState<ProvincialPolicyRequest>(EMPTY);
-  const [result, setResult]   = useState<ProvincialPolicyResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState<string | null>(null);
+  const [form, setForm]         = useState<ProvincialPolicyRequest>(EMPTY);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const { mutate, data: result, isPending, isError, error, reset } =
+    useMutation<ProvincialPolicyResponse, Error, ProvincialPolicyRequest>({
+      mutationFn: analyseProvincialPolicy,
+    });
 
   const setStr = (k: keyof ProvincialPolicyRequest) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -38,19 +43,13 @@ export default function ProvincialPolicyPage() {
     (e: React.ChangeEvent<HTMLInputElement>) =>
       setForm(f => ({ ...f, [k]: parseFloat(e.target.value) || 0 }));
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.profileId.trim()) { setError('Profile ID is required.'); return; }
-    if (!/^\d{4}$/.test(form.taxYear)) { setError('Tax Year must be a 4-digit year (e.g. 2024).'); return; }
-    setLoading(true);
-    setError(null);
-    try {
-      setResult(await analyseProvincialPolicy(form));
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Provincial analysis failed');
-    } finally {
-      setLoading(false);
-    }
+    if (!form.profileId.trim()) { setValidationError('Profile ID is required.'); return; }
+    if (!/^\d{4}$/.test(form.taxYear)) { setValidationError('Tax Year must be a 4-digit year (e.g. 2024).'); return; }
+    setValidationError(null);
+    reset();
+    mutate(form);
   };
 
   return (
@@ -88,11 +87,14 @@ export default function ProvincialPolicyPage() {
             {' '}Is Student
           </label>
         </div>
-        <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? 'Analysing…' : 'Analyse'}
+        <button type="submit" disabled={isPending} className="btn-primary">
+          {isPending ? 'Analysing…' : 'Analyse'}
         </button>
-        {error && <p className="error">{error}</p>}
+        {validationError && <p className="error">{validationError}</p>}
+        {isError && <p className="error">{error.message}</p>}
       </form>
+
+      {isPending && <CardSkeleton />}
 
       {result && (
         <div className="card result-card">

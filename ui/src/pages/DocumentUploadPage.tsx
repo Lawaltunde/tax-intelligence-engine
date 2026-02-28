@@ -1,28 +1,23 @@
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { extractDocument } from '../api/endpoints';
 import type { ExtractedProfileDto } from '../api/types';
+import { CardSkeleton } from '../components/Skeleton';
 
 export default function DocumentUploadPage() {
-  const [file, setFile]         = useState<File | null>(null);
-  const [taxYear, setTaxYear]   = useState('2024');
-  const [result, setResult]     = useState<ExtractedProfileDto | null>(null);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState<string | null>(null);
+  const [file, setFile]       = useState<File | null>(null);
+  const [taxYear, setTaxYear] = useState('2024');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const { mutate, data: result, isPending, isError, error, reset } =
+    useMutation<ExtractedProfileDto, Error, { file: File; taxYear: string }>({
+      mutationFn: ({ file, taxYear }) => extractDocument(file, taxYear),
+    });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    try {
-      const data = await extractDocument(file, taxYear);
-      setResult(data);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
-    } finally {
-      setLoading(false);
-    }
+    reset();
+    mutate({ file, taxYear });
   };
 
   return (
@@ -49,11 +44,13 @@ export default function DocumentUploadPage() {
             onChange={e => setFile(e.target.files?.[0] ?? null)}
           />
         </div>
-        <button type="submit" disabled={!file || loading} className="btn-primary">
-          {loading ? 'Extracting…' : 'Extract'}
+        <button type="submit" disabled={!file || isPending} className="btn-primary">
+          {isPending ? 'Extracting…' : 'Extract'}
         </button>
-        {error && <p className="error">{error}</p>}
+        {isError && <p className="error">{error.message}</p>}
       </form>
+
+      {isPending && <CardSkeleton />}
 
       {result && (
         <div className="card result-card">
