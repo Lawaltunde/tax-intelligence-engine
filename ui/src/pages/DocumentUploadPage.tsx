@@ -27,9 +27,18 @@ export default function DocumentUploadPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files ?? []);
+
+    const nonPdf = picked.filter(f => f.type !== 'application/pdf');
+    if (nonPdf.length > 0) {
+      toast.error(
+        `Only PDF files are accepted. Rejected: ${nonPdf.map(f => f.name).join(', ')}`
+      );
+    }
+
+    const validPdfs = picked.filter(f => f.type === 'application/pdf');
     setFiles(prev => {
       const existingKeys = new Set(prev.map(f => `${f.name}-${f.size}-${f.lastModified}`));
-      const fresh = picked.filter(f => !existingKeys.has(`${f.name}-${f.size}-${f.lastModified}`));
+      const fresh = validPdfs.filter(f => !existingKeys.has(`${f.name}-${f.size}-${f.lastModified}`));
       return [...prev, ...fresh];
     });
     e.target.value = '';
