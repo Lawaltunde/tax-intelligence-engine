@@ -58,6 +58,25 @@ export default function Layout() {
           </span>
         </header>
         <Outlet />
+        <footer className="app-footer">
+          <div className="app-footer-left">
+            <div className="app-footer-brand">
+              <span className="footer-maple" aria-hidden="true">🍁</span>
+              ATIE
+            </div>
+            <span className="app-footer-sep" aria-hidden="true">·</span>
+            <span className="app-footer-tagline">AI constructs. Human supervises. System files.</span>
+          </div>
+          <div className="app-footer-right">
+            <span className="app-footer-pill">
+              <span aria-hidden="true">●</span> Spring Boot · Java 21
+            </span>
+            <span className="app-footer-sep" aria-hidden="true">·</span>
+            <span className="app-footer-link">v1.0.0</span>
+            <span className="app-footer-sep" aria-hidden="true">·</span>
+            <span className="app-footer-link">Canada 🇨🇦</span>
+          </div>
+        </footer>
       </div>
     </div>
   );
