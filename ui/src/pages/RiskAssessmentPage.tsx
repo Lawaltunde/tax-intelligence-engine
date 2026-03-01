@@ -1,5 +1,6 @@
 import { useState, useId } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { assessRisk } from '../api/endpoints';
 import type { RiskAssessmentRequestDto, RiskResponseDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
@@ -18,6 +19,13 @@ export default function RiskAssessmentPage() {
   const { mutate, data: result, isPending, isError, error, reset } =
     useMutation<RiskResponseDto, Error, RiskAssessmentRequestDto>({
       mutationFn: assessRisk,
+      onSuccess: (data) => {
+        const label = data.riskLevel === 'HIGH' ? '🔴 High risk' : data.riskLevel === 'MEDIUM' ? '🟡 Medium risk' : '🟢 Low risk';
+        toast(`${label} — score ${data.riskScore}/100`, { duration: 4000 });
+      },
+      onError: (err) => {
+        toast.error(`Risk assessment failed: ${err.message}`);
+      },
     });
 
   const setStr = (k: keyof RiskAssessmentRequestDto) =>
@@ -101,6 +109,39 @@ export default function RiskAssessmentPage() {
               </ul>
             </>
           )}
+
+          <div className="ai-boundary-panel">
+            <div className="ai-boundary-col ai-boundary-auto">
+              <div className="ai-boundary-header">
+                <span className="ai-boundary-icon" aria-hidden="true">✦</span>
+                <strong>AI Auto-Assessed</strong>
+              </div>
+              <p>These fields were evaluated deterministically and require no further human review.</p>
+              <ul>
+                <li>Employment income bracket match</li>
+                <li>RRSP contribution room validation</li>
+                <li>Capital loss carry-forward eligibility</li>
+                <li>Tuition credit carry-forward check</li>
+                <li>Prior-year income variance (≤15%)</li>
+              </ul>
+            </div>
+            <div className="ai-boundary-col ai-boundary-human">
+              <div className="ai-boundary-header">
+                <span className="ai-boundary-icon" aria-hidden="true">👤</span>
+                <strong>Requires Human Sign-off</strong>
+              </div>
+              <p>These decisions exceed AI confidence thresholds and are queued for advisor review.</p>
+              <ul>
+                {result.riskLevel === 'HIGH' && <li>High-risk profile — advisor must approve before filing</li>}
+                {result.riskLevel !== 'LOW' && <li>Capital gains reporting — CRA audit trigger range</li>}
+                {form.hasDiscrepancy && <li>Unresolved CRA discrepancies flagged in reconciliation</li>}
+                {result.riskScore >= 60 && <li>Risk score ≥ 60 — mandatory human checkpoint</li>}
+                {result.riskScore < 60 && result.riskLevel === 'LOW' && (
+                  <li className="ai-boundary-none">No mandatory human checkpoints at this risk level</li>
+                )}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
     </div>

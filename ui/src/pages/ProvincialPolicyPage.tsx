@@ -1,5 +1,6 @@
 import { useState, useId } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { analyseProvincialPolicy } from '../api/endpoints';
 import type { ProvincialPolicyRequest, ProvincialPolicyResponse, Province } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
@@ -34,6 +35,13 @@ export default function ProvincialPolicyPage() {
   const { mutate, data: result, isPending, isError, error, reset } =
     useMutation<ProvincialPolicyResponse, Error, ProvincialPolicyRequest>({
       mutationFn: analyseProvincialPolicy,
+      onSuccess: (data) => {
+        const credits = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(data.estimatedCreditsTotal);
+        toast.success(`Policy analysis complete — ${credits} in eligible credits.`);
+      },
+      onError: (err) => {
+        toast.error(`Policy analysis failed: ${err.message}`);
+      },
     });
 
   const setStr = (k: keyof ProvincialPolicyRequest) =>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { extractDocument } from '../api/endpoints';
 import type { ExtractedProfileDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
@@ -12,6 +13,12 @@ export default function DocumentUploadPage() {
   const { mutate, data: result, isPending, isError, error, reset } =
     useMutation<ExtractedProfileDto, Error, { file: File; taxYear: string }>({
       mutationFn: ({ file, taxYear }) => extractDocument(file, taxYear),
+      onSuccess: () => {
+        toast.success('Document extracted successfully.');
+      },
+      onError: (err) => {
+        toast.error(`Extraction failed: ${err.message}`);
+      },
     });
 
   const handleSubmit = (e: React.FormEvent) => {

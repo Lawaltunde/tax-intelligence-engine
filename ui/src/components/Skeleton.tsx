@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 /**
  * Skeleton — animated placeholder shown while data is loading.
  *
@@ -12,7 +14,7 @@ interface SkeletonProps {
   height?: string | number;
   count?:  number;
   gap?:    number;
-  style?:  React.CSSProperties;
+  style?:  CSSProperties;
 }
 
 export function Skeleton({ width = '100%', height = 16, count = 1, gap = 8, style }: SkeletonProps) {

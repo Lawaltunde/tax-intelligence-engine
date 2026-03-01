@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { importFromCra } from '../api/endpoints';
 import type { CraImportDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
@@ -12,6 +13,12 @@ export default function CraImportPage() {
   const { mutate, data: result, isPending, isError, error, reset } =
     useMutation<CraImportDto, Error, typeof form>({
       mutationFn: importFromCra,
+      onSuccess: () => {
+        toast.success('CRA data imported successfully.');
+      },
+      onError: (err) => {
+        toast.error(`CRA import failed: ${err.message}`);
+      },
     });
 
   const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>

@@ -112,7 +112,7 @@ export default function ReconciliationPage() {
                       <td>{fmt(r.craValue)}</td>
                       <td>{fmt(r.delta)}</td>
                       <td><SeverityBadge s={r.severity} /></td>
-                      <td>{r.requiresReview ? '⚠ Yes' : '—'}</td>
+                      <td><ReviewBadge required={r.requiresReview} /></td>
                       <td className="explanation">{r.aiExplanation}</td>
                     </tr>
                   ))}
@@ -139,6 +139,21 @@ function NumField({ label, value, onChange }: { label: string; value: number; on
 function SeverityBadge({ s }: { s: string }) {
   const colors: Record<string, string> = { LOW: '#22c55e', MEDIUM: '#f59e0b', HIGH: '#ef4444' };
   return <span style={{ color: colors[s] ?? '#6b7280', fontWeight: 600 }}>{s}</span>;
+}
+
+function ReviewBadge({ required }: { required: boolean }) {
+  if (required) {
+    return (
+      <span className="review-badge review-badge-human" title="This field requires human review">
+        <span aria-hidden="true">👤</span> Human Review
+      </span>
+    );
+  }
+  return (
+    <span className="review-badge review-badge-ai" title="AI assessed and approved this field">
+      <span aria-hidden="true">✦</span> AI Approved
+    </span>
+  );
 }
 
 function fmt(n: number) {

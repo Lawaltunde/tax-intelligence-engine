@@ -1,5 +1,6 @@
 import { useState, useId } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { simulateRrsp } from '../api/endpoints';
 import type { TaxProfileBody, OptimizationResponseDto } from '../api/types';
 import { CardSkeleton } from '../components/Skeleton';
@@ -19,6 +20,13 @@ export default function OptimizationPage() {
   const { mutate, data: result, isPending, isError, error, reset } =
     useMutation<OptimizationResponseDto, Error, { profile: TaxProfileBody; contrib: number }>({
       mutationFn: ({ profile, contrib }) => simulateRrsp(profile, contrib),
+      onSuccess: (data) => {
+        const saved = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(data.estimatedSavings);
+        toast.success(`RRSP optimisation complete — estimated savings ${saved}.`);
+      },
+      onError: (err) => {
+        toast.error(`Optimisation failed: ${err.message}`);
+      },
     });
 
   const setStr = (k: keyof TaxProfileBody) =>
