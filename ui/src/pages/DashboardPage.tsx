@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function DashboardPage() {
   const steps = [
     { num: '01', icon: '📄', title: 'Upload Document',   desc: 'AI extracts structured tax fields from your PDF slip with confidence scoring.', to: '/upload' },
@@ -24,16 +26,16 @@ export default function DashboardPage() {
 
       <p className="dashboard-section-label">Workflow — follow these steps in order</p>
       <div className="dashboard-grid">
-        {steps.map(c => (
-          <a key={c.to} href={c.to} className="dash-card">
+        {steps.map(step => (
+          <Link key={step.to} to={step.to} className="dash-card">
             <div className="dash-card-header">
-              <div className="dash-icon-wrap" aria-hidden="true">{c.icon}</div>
-              <span className="dash-step-num">{c.num}</span>
+              <div className="dash-icon-wrap" aria-hidden="true">{step.icon}</div>
+              <span className="dash-step-num">{step.num}</span>
             </div>
-            <h3>{c.title}</h3>
-            <p>{c.desc}</p>
+            <h3>{step.title}</h3>
+            <p>{step.desc}</p>
             <span className="dash-card-arrow" aria-hidden="true">→</span>
-          </a>
+          </Link>
         ))}
       </div>
 
