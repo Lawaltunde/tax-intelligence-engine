@@ -58,6 +58,15 @@ public class ReconciliationController {
                         : ConfidenceScores.defaultScores())
                 .build();
 
+        // Fetch CRA data for this taxpayer.
+        //
+        // In mock-mode (default for dev/competition): importForTaxpayer() returns a
+        // realistic simulated NOA so reconciliation logic can be exercised end-to-end.
+        //
+        // For production readiness, ReconciliationRequestDto would need to carry
+        // dateOfBirth + netfileAccessCode so we can build a CraAuthRequest and call
+        // importWithNac() instead. importForTaxpayer() itself throws if mock-mode=false,
+        // preventing any accidental call in a live environment.
         CraImportDto cra = craImportService.importForTaxpayer(request.sin(), request.taxYear());
         List<ReconciliationResult> results = reconciliationService.reconcile(profile, cra);
 

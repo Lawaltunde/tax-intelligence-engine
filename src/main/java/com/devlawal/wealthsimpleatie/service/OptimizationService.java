@@ -54,6 +54,18 @@ public class OptimizationService {
         double baseIncome    = profile.employmentIncome();
         double existingRrsp  = profile.rrspContribution();
 
+        // ── Enforce RRSP deduction room (CRA rule: total deduction ≤ deduction limit) ──
+        // rrspContributionRoom on the profile is the limit from the taxpayer's prior-year NOA.
+        // The simulation must not propose a deduction that exceeds remaining room, otherwise
+        // the calculated savings would be for a contribution CRA will not allow.
+        double remainingRoom = Math.max(0, profile.rrspContributionRoom() - existingRrsp);
+        double effectiveAdditionalContrib = Math.min(additionalContrib, remainingRoom);
+        if (effectiveAdditionalContrib < additionalContrib) {
+            log.warn("Requested additionalContrib={} exceeds remaining RRSP room={}; " +
+                     "capping simulation at {}",
+                    additionalContrib, remainingRoom, effectiveAdditionalContrib);
+        }
+
         // ── Capital loss carryforward reduces net capital gains (CRA Schedule 3) ─
         double capitalLossApplied = Math.min(profile.capitalLossCarryforward(), profile.capitalGains());
         double netCapitalGains = Math.max(0,
@@ -65,7 +77,7 @@ public class OptimizationService {
         double currentTaxableIncome   = Math.max(0,
                 baseIncome - existingRrsp + taxableCapitalGains);
         double optimizedTaxableIncome = Math.max(0,
-                baseIncome - existingRrsp - additionalContrib + taxableCapitalGains);
+                baseIncome - existingRrsp - effectiveAdditionalContrib + taxableCapitalGains);
 
         double currentTaxBeforeCredits   = TaxBracketCalculator.calculateFederalTax(currentTaxableIncome);
         double optimizedTaxBeforeCredits = TaxBracketCalculator.calculateFederalTax(optimizedTaxableIncome);
@@ -78,29 +90,33 @@ public class OptimizationService {
         double savings       = Math.max(0, currentTax - optimizedTax);
         double marginalRate  = TaxBracketCalculator.marginalRate(currentTaxableIncome);
 
-        log.info("Optimization: baseIncome={}, additionalContrib={}, capitalLossCarryforward={}, " +
+        log.info("Optimization: baseIncome={}, requestedContrib={}, effectiveContrib={}, " +
+                 "remainingRoom={}, capitalLossCarryforward={}, " +
                  "tuitionCarryforward={}, currentTax={}, optimizedTax={}, savings={}",
-                baseIncome, additionalContrib, profile.capitalLossCarryforward(),
+                baseIncome, additionalContrib, effectiveAdditionalContrib, remainingRoom,
+                profile.capitalLossCarryforward(),
                 profile.tuitionCarryforward(), currentTax, optimizedTax, savings);
 
         // LLM generates explanation only
         String explanation = explanationAgent.explain(
-                additionalContrib, currentTax, optimizedTax, savings, marginalRate);
+                effectiveAdditionalContrib, currentTax, optimizedTax, savings, marginalRate);
 
         // Persist audit trail
         auditLogService.record(AiDecisionLog.builder()
                 .profileId(profile.profileId())
                 .decisionType(DecisionType.OPTIMIZATION)
                 .agentName("OptimizationExplanationAgent")
-                .promptSummary(("contrib=%.2f currentTax=%.2f optimizedTax=%.2f savings=%.2f " +
+                .promptSummary(("requestedContrib=%.2f effectiveContrib=%.2f remainingRoom=%.2f " +
+                                "currentTax=%.2f optimizedTax=%.2f savings=%.2f " +
                                 "capitalLossCarryforward=%.2f tuitionCarryforward=%.2f")
-                        .formatted(additionalContrib, currentTax, optimizedTax, savings,
+                        .formatted(additionalContrib, effectiveAdditionalContrib, remainingRoom,
+                                currentTax, optimizedTax, savings,
                                 profile.capitalLossCarryforward(), profile.tuitionCarryforward()))
                 .aiOutput(explanation)
                 .build());
 
         return OptimizationResult.builder()
-                .additionalContribution(additionalContrib)
+                .additionalContribution(effectiveAdditionalContrib)
                 .currentTax(currentTax)
                 .optimizedTax(optimizedTax)
                 .estimatedSavings(savings)

@@ -23,20 +23,22 @@ class TaxBracketCalculatorTest {
     }
 
     @Test
-    @DisplayName("income fully within bracket 1 taxed at 15%")
+    @DisplayName("income fully within bracket 1 taxed at 15%, net of BPA credit")
     void bracket1Only() {
         double income = 40_000.00;
-        double expected = Math.round(income * 0.15 * 100.0) / 100.0;
+        double grossTax = Math.round(income * 0.15 * 100.0) / 100.0;
+        double expected = Math.max(0, grossTax - TaxBracketCalculator.FEDERAL_BPA_CREDIT);
         assertThat(TaxBracketCalculator.calculateFederalTax(income)).isEqualTo(expected);
     }
 
     @Test
-    @DisplayName("income spanning bracket 1 and 2 applies correct marginal rates")
+    @DisplayName("income spanning bracket 1 and 2 applies correct marginal rates, net of BPA credit")
     void bracket1And2() {
         double income = 80_000.00;
         double bracket1Tax = 57_375.00 * 0.15;
         double bracket2Tax = (80_000.00 - 57_375.00) * 0.205;
-        double expected = Math.round((bracket1Tax + bracket2Tax) * 100.0) / 100.0;
+        double grossTax = Math.round((bracket1Tax + bracket2Tax) * 100.0) / 100.0;
+        double expected = Math.max(0, grossTax - TaxBracketCalculator.FEDERAL_BPA_CREDIT);
         assertThat(TaxBracketCalculator.calculateFederalTax(income)).isEqualTo(expected);
     }
 

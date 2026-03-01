@@ -34,10 +34,13 @@ class OptimizationServiceTest {
     @Test
     @DisplayName("computes positive savings for a valid additional RRSP contribution")
     void computesPositiveSavings() {
+        // RRSP room = $14,400 (18% of $80k prior year), existing contribution = $3,000
+        // → remaining room = $11,400 ≥ $5,000 requested, so full $5,000 is effective
         TaxProfile profile = TaxProfile.builder()
                 .profileId("test-profile-001")
                 .employmentIncome(80_000.00)
                 .rrspContribution(3_000.00)
+                .rrspContributionRoom(14_400.00)
                 .capitalGains(0.00)
                 .build();
 

@@ -52,8 +52,11 @@ public class ProvincialPolicyService {
      */
     public ProvincialPolicyResponse analyse(ProvincialPolicyRequest request) {
         // ── Step 1: Deterministic provincial tax calculation ─────────────────
+        // Capital gains are only 50% taxable (CRA inclusion rate — same rule as federal).
+        double taxableCapitalGains = Math.max(0,
+                (request.capitalGains() - 0.0) * 0.50);   // future: subtract capital loss C/F if exposed on request
         double taxableIncome = Math.max(0,
-                request.employmentIncome() - request.rrspContribution() + request.capitalGains());
+                request.employmentIncome() - request.rrspContribution() + taxableCapitalGains);
 
         double grossProvincialTax = ProvincialTaxCalculator
                 .calculateProvincialTax(taxableIncome, request.province());
@@ -70,11 +73,13 @@ public class ProvincialPolicyService {
                 provincialTaxBeforeOtherCredits);
 
         // ── Step 2: AI identifies additional credits and generates explanation ─
+        // Pass taxableCapitalGains (50% included) to the agent so its reasoning
+        // matches the deterministic figures shown to the user.
         ProvincialPolicyAgent.ProvincialPolicyResponse aiResponse = policyAgent.analyse(
                 request.province(),
                 request.employmentIncome(),
                 request.rrspContribution(),
-                request.capitalGains(),
+                taxableCapitalGains,
                 request.tuitionAmount(),
                 request.hasDependents(),
                 request.isStudent(),

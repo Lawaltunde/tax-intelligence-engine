@@ -29,6 +29,21 @@ public final class TaxBracketCalculator {
     private static final double RATE_5 = 0.33;
 
     /**
+     * 2025 federal Basic Personal Amount.
+     * Every Canadian resident gets a non-refundable credit equal to BPA × 15%.
+     * This is applied inside calculateFederalTax to arrive at net federal tax.
+     * Source: CRA T1 General 2025, Schedule 1 line 30000.
+     */
+    public static final double FEDERAL_BASIC_PERSONAL_AMOUNT = 16_129.00;
+
+    /**
+     * Non-refundable BPA credit ($16,129 × 15% = $2,419.35).
+     * Pre-computed here so it is used consistently.
+     */
+    public static final double FEDERAL_BPA_CREDIT =
+            round(FEDERAL_BASIC_PERSONAL_AMOUNT * RATE_1);
+
+    /**
      * The bottom federal bracket rate (15%).
      * Used externally to compute non-refundable credits (e.g. tuition carryforward)
      * which are always valued at the lowest marginal rate per CRA Schedule 11.
@@ -40,9 +55,10 @@ public final class TaxBracketCalculator {
 
     /**
      * Computes federal income tax payable on the given taxable income.
+     * Includes the Basic Personal Amount non-refundable credit (2025: $16,129 × 15% = $2,419.35).
      *
-     * @param taxableIncome gross employment income minus RRSP deductions
-     * @return federal tax payable (always ≥ 0)
+     * @param taxableIncome gross employment income minus RRSP deductions (plus 50% of net capital gains)
+     * @return net federal tax payable after BPA credit (always ≥ 0)
      */
     public static double calculateFederalTax(double taxableIncome) {
         if (taxableIncome <= 0) return 0.0;
@@ -54,29 +70,29 @@ public final class TaxBracketCalculator {
         double bracket1 = Math.min(remaining, BRACKET_1_TOP);
         tax += bracket1 * RATE_1;
         remaining -= bracket1;
-        if (remaining <= 0) return round(tax);
+        if (remaining <= 0) return Math.max(0, round(tax) - FEDERAL_BPA_CREDIT);
 
         // Bracket 2
         double bracket2 = Math.min(remaining, BRACKET_2_TOP - BRACKET_1_TOP);
         tax += bracket2 * RATE_2;
         remaining -= bracket2;
-        if (remaining <= 0) return round(tax);
+        if (remaining <= 0) return Math.max(0, round(tax) - FEDERAL_BPA_CREDIT);
 
         // Bracket 3
         double bracket3 = Math.min(remaining, BRACKET_3_TOP - BRACKET_2_TOP);
         tax += bracket3 * RATE_3;
         remaining -= bracket3;
-        if (remaining <= 0) return round(tax);
+        if (remaining <= 0) return Math.max(0, round(tax) - FEDERAL_BPA_CREDIT);
 
         // Bracket 4
         double bracket4 = Math.min(remaining, BRACKET_4_TOP - BRACKET_3_TOP);
         tax += bracket4 * RATE_4;
         remaining -= bracket4;
-        if (remaining <= 0) return round(tax);
+        if (remaining <= 0) return Math.max(0, round(tax) - FEDERAL_BPA_CREDIT);
 
         // Bracket 5
         tax += remaining * RATE_5;
-        return round(tax);
+        return Math.max(0, round(tax) - FEDERAL_BPA_CREDIT);
     }
 
     /**
