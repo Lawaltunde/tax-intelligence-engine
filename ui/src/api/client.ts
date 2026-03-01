@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080',
@@ -9,13 +9,22 @@ const api = axios.create({
 // so every page's onError handler gets a sensible err.message.
 api.interceptors.response.use(
   response => response,
-  (error: AxiosError<{ message?: string; error?: string }>) => {
-    if (error.response) {
-      const status = error.response.status;
-      const body   = error.response.data;
-
+  (error: unknown) => {
+    // axios wraps HTTP errors — check for the response shape directly
+    if (
+      error != null &&
+      typeof error === 'object' &&
+      'response' in error &&
+      error.response != null
+    ) {
+      const response = error.response as {
+        status: number;
+        data?: { message?: string; error?: string };
+      };
+      const status  = response.status;
+      const body    = response.data ?? {};
       const serverMsg =
-        (typeof body === 'object' && body !== null && (body.message ?? body.error)) || null;
+        (typeof body === 'object' && (body.message ?? body.error)) || null;
 
       const fallback: Record<number, string> = {
         400: 'Invalid request — please check your inputs.',
@@ -33,8 +42,12 @@ api.interceptors.response.use(
       return Promise.reject(new Error(message));
     }
 
-    if (error.request) {
-      // Request was made but no response received (CORS pre-flight failure, server down, etc.)
+    // Request left the browser but no response arrived (server down, CORS, etc.)
+    if (
+      error != null &&
+      typeof error === 'object' &&
+      'request' in error
+    ) {
       return Promise.reject(
         new Error('Cannot reach the server. Please check your connection or try again shortly.')
       );
