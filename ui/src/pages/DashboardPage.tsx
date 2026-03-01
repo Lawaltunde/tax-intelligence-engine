@@ -13,29 +13,11 @@ export default function DashboardPage() {
     <div className="page">
       <div className="dashboard-hero">
         <div className="dashboard-hero-content">
-          <h1>AI Tax <span>Intelligence</span> Engine</h1>
+          <h1>Canadian Tax <span>Intelligence</span></h1>
           <p>
-            Canadian tax AI assistant — document ingestion, CRA reconciliation,
-            RRSP optimization, risk assessment, and provincial policy analysis.
+            Your end-to-end tax workflow — from document ingestion and CRA
+            reconciliation through to risk assessment and provincial analysis.
           </p>
-          <div className="hero-stats">
-            <div className="hero-stat">
-              <span className="hero-stat-value">7</span>
-              <span className="hero-stat-label">AI Modules</span>
-            </div>
-            <div className="hero-stat">
-              <span className="hero-stat-value">GPT-4o</span>
-              <span className="hero-stat-label">AI Model</span>
-            </div>
-            <div className="hero-stat">
-              <span className="hero-stat-value">Mock</span>
-              <span className="hero-stat-label">CRA Mode</span>
-            </div>
-            <div className="hero-stat">
-              <span className="hero-stat-value">CA</span>
-              <span className="hero-stat-label">Tax Jurisdiction</span>
-            </div>
-          </div>
         </div>
       </div>
 

@@ -47,11 +47,7 @@ export default function Layout() {
         </nav>
 
         <div className="sidebar-footer">
-          <p className="sidebar-footer-label">System Status</p>
-          <div className="sidebar-status">
-            <span className="status-dot" />
-            Mock Mode Active
-          </div>
+          <p className="sidebar-footer-label">v1.0.0 · Canada</p>
         </div>
       </aside>
 
@@ -60,9 +56,6 @@ export default function Layout() {
           <span className="topbar-breadcrumb">
             ATIE &rsaquo; <strong>{pageTitle}</strong>
           </span>
-          <div className="topbar-right">
-            <span className="topbar-env-badge">⚠ Mock Mode</span>
-          </div>
         </header>
         <Outlet />
       </div>
