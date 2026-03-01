@@ -15,6 +15,9 @@ const EMPTY: RiskAssessmentRequestDto = {
 
 export default function RiskAssessmentPage() {
   const [form, setForm] = useState<RiskAssessmentRequestDto>(EMPTY);
+  // Captured at submit time so the result panel always reflects what was assessed,
+  // not the live form state (which the user may have changed since submitting).
+  const [submittedHasDiscrepancy, setSubmittedHasDiscrepancy] = useState(false);
 
   const { mutate, data: result, isPending, isError, error, reset } =
     useMutation<RiskResponseDto, Error, RiskAssessmentRequestDto>({
@@ -39,6 +42,7 @@ export default function RiskAssessmentPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     reset();
+    setSubmittedHasDiscrepancy(form.hasDiscrepancy);
     mutate(form);
   };
 
@@ -134,7 +138,7 @@ export default function RiskAssessmentPage() {
               <ul>
                 {result.riskLevel === 'HIGH' && <li>High-risk profile — advisor must approve before filing</li>}
                 {result.riskLevel !== 'LOW' && <li>Capital gains reporting — CRA audit trigger range</li>}
-                {form.hasDiscrepancy && <li>Unresolved CRA discrepancies flagged in reconciliation</li>}
+                {submittedHasDiscrepancy && <li>Unresolved CRA discrepancies flagged in reconciliation</li>}
                 {result.riskScore >= 60 && <li>Risk score ≥ 60 — mandatory human checkpoint</li>}
                 {result.riskScore < 60 && result.riskLevel === 'LOW' && (
                   <li className="ai-boundary-none">No mandatory human checkpoints at this risk level</li>
