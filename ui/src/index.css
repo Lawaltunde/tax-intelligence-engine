@@ -655,15 +655,9 @@ tbody tr:hover td { background: var(--gray-50); }
 }
 .app-footer-link {
   font-size: 0.75rem; color: var(--text-muted);
-  transition: color var(--duration-fast) var(--ease);
 }
-.app-footer-link:hover { color: var(--brand-600); }
-.app-footer-pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  padding: 3px 9px; border-radius: var(--radius-full);
-  background: var(--green-100); color: var(--green-700);
-  border: 1px solid #bbf7d0;
+.app-footer-copy {
+  font-size: 0.75rem; color: var(--text-muted);
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
