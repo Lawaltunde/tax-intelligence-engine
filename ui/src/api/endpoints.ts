@@ -24,6 +24,9 @@ export const importFromCra = (body: CraAuthRequest) =>
 // ── Document Extraction ───────────────────────────────────────────────────────
 
 export const extractDocument = (files: File[], taxYear: string) => {
+  if (!files || files.length === 0) {
+    return Promise.reject(new Error('No files provided to extractDocument'));
+  }
   const form = new FormData();
   files.forEach(f => form.append('file', f));
   form.append('taxYear', taxYear);

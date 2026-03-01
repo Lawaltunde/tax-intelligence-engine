@@ -28,8 +28,8 @@ export default function DocumentUploadPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files ?? []);
     setFiles(prev => {
-      const existingNames = new Set(prev.map(f => f.name));
-      const fresh = picked.filter(f => !existingNames.has(f.name));
+      const existingKeys = new Set(prev.map(f => `${f.name}-${f.size}-${f.lastModified}`));
+      const fresh = picked.filter(f => !existingKeys.has(`${f.name}-${f.size}-${f.lastModified}`));
       return [...prev, ...fresh];
     });
     e.target.value = '';

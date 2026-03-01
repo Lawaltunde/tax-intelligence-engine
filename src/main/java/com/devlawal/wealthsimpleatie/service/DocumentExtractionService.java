@@ -117,6 +117,16 @@ public class DocumentExtractionService {
      * @return merged TaxProfile
      */
     public TaxProfile extractAndMerge(List<MultipartFile> files, String taxYear) {
+        if (files == null || files.isEmpty()) {
+            throw new DocumentExtractionException(
+                    "files must be a non-empty list of MultipartFile.");
+        }
+        for (MultipartFile f : files) {
+            if (f == null) {
+                throw new DocumentExtractionException(
+                        "files must be a non-empty list of MultipartFile — null element found.");
+            }
+        }
         if (taxYear == null || taxYear.isBlank() || !taxYear.matches("\\d{4}")) {
             throw new DocumentExtractionException(
                     "Invalid taxYear '%s' — expected a 4-digit year (e.g. 2024).".formatted(taxYear));
