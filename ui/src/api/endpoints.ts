@@ -30,10 +30,14 @@ export const extractDocument = (files: File[], taxYear: string) => {
   const form = new FormData();
   files.forEach(f => form.append('file', f));
   form.append('taxYear', taxYear);
-  // Do NOT set Content-Type manually — axios must auto-set multipart/form-data
-  // with the correct boundary when the body is a FormData instance.
+  // Explicitly delete the default 'application/json' Content-Type so the browser
+  // sets 'multipart/form-data; boundary=...' automatically from the FormData body.
+  // Without this, axios 1.x keeps the default JSON header and the Spring backend
+  // receives a malformed request → HTTP 500.
   return api
-    .post<ExtractedProfileDto>('/api/v1/documents/extract', form)
+    .post<ExtractedProfileDto>('/api/v1/documents/extract', form, {
+      headers: { 'Content-Type': undefined },
+    })
     .then(r => r.data);
 };
 
