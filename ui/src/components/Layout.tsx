@@ -70,7 +70,7 @@ export default function Layout() {
           <div className="app-footer-right">
             <span className="app-footer-copy">© 2026 Tundelawal. All rights reserved.</span>
             <span className="app-footer-sep" aria-hidden="true">·</span>
-            <span className="app-footer-link">Canada 🇨🇦</span>
+            <span className="app-footer-text">Canada 🇨🇦</span>
           </div>
         </footer>
       </div>

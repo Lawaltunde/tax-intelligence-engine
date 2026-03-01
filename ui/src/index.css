@@ -653,7 +653,7 @@ tbody tr:hover td { background: var(--gray-50); }
 .app-footer-right {
   display: flex; align-items: center; gap: 16px;
 }
-.app-footer-link {
+.app-footer-text {
   font-size: 0.75rem; color: var(--text-muted);
 }
 .app-footer-copy {
