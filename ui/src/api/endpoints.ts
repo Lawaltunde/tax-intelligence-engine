@@ -23,9 +23,9 @@ export const importFromCra = (body: CraAuthRequest) =>
 
 // ── Document Extraction ───────────────────────────────────────────────────────
 
-export const extractDocument = (file: File, taxYear: string) => {
+export const extractDocument = (files: File[], taxYear: string) => {
   const form = new FormData();
-  form.append('file', file);
+  files.forEach(f => form.append('file', f));
   form.append('taxYear', taxYear);
   // Do NOT set Content-Type manually — axios must auto-set multipart/form-data
   // with the correct boundary when the body is a FormData instance.

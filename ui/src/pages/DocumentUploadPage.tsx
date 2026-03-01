@@ -7,31 +7,52 @@ import { CardSkeleton } from '../components/Skeleton';
 import InlineMessage from '../components/InlineMessage';
 
 export default function DocumentUploadPage() {
-  const [file, setFile]       = useState<File | null>(null);
+  const [files, setFiles]     = useState<File[]>([]);
   const [taxYear, setTaxYear] = useState('2024');
 
   const { mutate, data: result, isPending, isError, error, reset } =
-    useMutation<ExtractedProfileDto, Error, { file: File; taxYear: string }>({
-      mutationFn: ({ file, taxYear }) => extractDocument(file, taxYear),
-      onSuccess: () => {
-        toast.success('Document extracted successfully.');
+    useMutation<ExtractedProfileDto, Error, { files: File[]; taxYear: string }>({
+      mutationFn: ({ files, taxYear }) => extractDocument(files, taxYear),
+      onSuccess: (_data, { files }) => {
+        toast.success(
+          files.length > 1
+            ? `${files.length} slips merged successfully.`
+            : 'Document extracted successfully.'
+        );
       },
       onError: (err) => {
         toast.error(`Extraction failed: ${err.message}`);
       },
     });
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files ?? []);
+    setFiles(prev => {
+      const existingNames = new Set(prev.map(f => f.name));
+      const fresh = picked.filter(f => !existingNames.has(f.name));
+      return [...prev, ...fresh];
+    });
+    e.target.value = '';
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return;
+    if (files.length === 0) return;
     reset();
-    mutate({ file, taxYear });
+    mutate({ files, taxYear });
   };
 
   return (
     <div className="page">
       <h1>Document Upload</h1>
-      <p className="subtitle">Upload a PDF tax slip (T4, T5, RRSP receipt, T2202) to extract your tax data.</p>
+      <p className="subtitle">
+        Upload one or more PDF tax slips (T4, T5, RRSP receipt, T2202).
+        Multiple T4s from different employers are supported — income will be summed accurately.
+      </p>
 
       <form onSubmit={handleSubmit} className="card form-card">
         <div className="field">
@@ -44,16 +65,62 @@ export default function DocumentUploadPage() {
             maxLength={4}
           />
         </div>
+
         <div className="field">
-          <label>PDF Tax Slip</label>
+          <label>PDF Tax Slip(s)</label>
           <input
             type="file"
             accept="application/pdf"
-            onChange={e => setFile(e.target.files?.[0] ?? null)}
+            multiple
+            onChange={handleFileChange}
           />
+          <span style={{ fontSize: 12, color: 'var(--text-muted, #6b7280)', marginTop: 4 }}>
+            You can add multiple files one at a time or select several at once.
+          </span>
         </div>
-        <button type="submit" disabled={!file || isPending} className="btn-primary">
-          {isPending ? 'Extracting…' : 'Extract'}
+
+        {files.length > 0 && (
+          <div className="field">
+            <label>
+              Selected slip{files.length > 1 ? 's' : ''}&nbsp;
+              <span style={{ fontWeight: 400, color: 'var(--text-muted, #6b7280)' }}>
+                ({files.length})
+              </span>
+            </label>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {files.map((f, i) => (
+                <li
+                  key={f.name}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    gap: 8, background: 'var(--surface-alt, #f9fafb)',
+                    borderRadius: 6, padding: '6px 10px', fontSize: 13,
+                  }}
+                >
+                  <span>📄 {f.name}</span>
+                  <button
+                    type="button"
+                    aria-label={`Remove ${f.name}`}
+                    onClick={() => removeFile(i)}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: '#ef4444', fontSize: 16, lineHeight: 1,
+                    }}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <button type="submit" disabled={files.length === 0 || isPending} className="btn-primary">
+          {isPending
+            ? 'Extracting…'
+            : files.length > 1
+              ? `Extract & Merge ${files.length} Slips`
+              : 'Extract'}
         </button>
         {isError && <InlineMessage variant="error">{error.message}</InlineMessage>}
       </form>
@@ -62,7 +129,9 @@ export default function DocumentUploadPage() {
 
       {result && (
         <div className="card result-card">
-          <h2>Extracted Profile</h2>
+          <h2>
+            {files.length > 1 ? `Merged Profile (${files.length} slips)` : 'Extracted Profile'}
+          </h2>
           <p className="profile-id">Profile ID: <code>{result.profileId}</code></p>
           <table>
             <tbody>
@@ -76,6 +145,11 @@ export default function DocumentUploadPage() {
             </tbody>
           </table>
           <h3>Confidence Scores</h3>
+          {files.length > 1 && (
+            <p style={{ fontSize: 12, color: 'var(--text-muted, #6b7280)', marginTop: 0 }}>
+              Scores show the lowest confidence across all {files.length} slips — the most conservative reading.
+            </p>
+          )}
           <table>
             <tbody>
               {Object.entries(
