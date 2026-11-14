@@ -1,5 +1,7 @@
 # Autonomous Tax Intelligence Engine (ATIE)
 
+[![CI](https://github.com/Lawaltunde/tax-intelligence-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Lawaltunde/tax-intelligence-engine/actions/workflows/ci.yml)
+
 An AI-native Canadian tax orchestration system built with **Java 21 + Spring Boot 3 + Spring AI**.
 
 ---
